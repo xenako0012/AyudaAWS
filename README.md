@@ -1,26 +1,39 @@
-# AWS Academy Cloud Foundations · Curso completo en español
+# AWS Academy Cloud Foundations · Módulos 1 a 4 · Curso en español
 
-Sitio web estático, sin dependencias ni proceso de compilación, con todo el temario de
-**AWS Academy Cloud Foundations** explicado en español: 10 módulos, 50 secciones,
-150 preguntas de autoevaluación y 260+ términos de glosario.
+Sitio web estático, sin dependencias ni proceso de compilación, con los **cuatro primeros
+módulos** de **AWS Academy Cloud Foundations** explicados en español: 4 módulos,
+17 secciones, 57 preguntas de autoevaluación y 101 términos de glosario.
+
+Está ampliado con el material de la charla **«La nube desde dentro: usuarios, proveedores
+y almacenamiento de objetos»** (Marcos García Martín, MEGA S4, CIFP Avilés, 29 de octubre
+de 2026), integrada dentro de las secciones de los cuatro módulos.
 
 ## Contenido
 
-| Módulos | Tema |
-| --- | --- |
-| 1 | Información general sobre los conceptos de la nube |
-| 2 | Facturación y economía de la nube |
-| 3 | Infraestructura global de AWS |
-| 4 | Seguridad en la nube |
-| 5 | Redes y entrega de contenido |
-| 6 | Informática (cómputo) |
-| 7 | Almacenamiento |
-| 8 | Bases de datos |
-| 9 | Arquitectura en la nube |
-| 10 | Monitoreo y escalado automático |
+| Módulo | Tema | Secciones |
+| --- | --- | --- |
+| 1 | Información general sobre los conceptos de la nube | 4 |
+| 2 | Facturación y economía de la nube | 5 |
+| 3 | Información general sobre la infraestructura global de AWS | 2 |
+| 4 | Seguridad en la nube | 6 |
 
 Cada sección incluye objetivos de aprendizaje, explicación con tablas y esquemas,
 notas orientadas al examen, términos clave y un cuestionario con explicaciones.
+
+### Material de la charla, ya integrado
+
+| Idea | Dónde aparece |
+| --- | --- |
+| Serverless como modelo de servicio y cuándo sale más barato | 1.1 |
+| Roles profesionales (DevOps, SRE, plataforma, arquitectura cloud) | 1.3 |
+| Percentiles, la cola lenta y «un archivo grande frente a muchos pequeños» | 1.2 |
+| Criterios para elegir proveedor, lock-in, Dropbox y Netflix, Data Act | 1.4 |
+| Los cinco conceptos que se facturan y el peligro del egress | 2.1 |
+| Incidentes reales (incendio de OVHcloud, caída de us-east-1) y el trabajo del proveedor | 3.1 |
+| Almacenamiento de objetos, once nueves, HLS y CDN, arquitectura web mínima | 3.2 |
+| Qué hace el proveedor por dentro y qué no cubre el modelo compartido | 4.1 |
+| Dependabot, OWASP y revisión de dependencias del propio proyecto | 4.3 |
+| Copias de seguridad en tres niveles, regla 3-2-1 e inmutabilidad | 4.5 |
 
 ## Funciones
 
@@ -39,7 +52,7 @@ notas orientadas al examen, términos clave y un cuestionario con explicaciones.
 index.html                  Estructura, navegación y contenedores
 assets/css/estilos.css      Diseño completo (temas, componentes, responsive, impresión)
 assets/js/app.js            Router por hash, render, progreso, buscador, quiz y examen
-assets/js/datos/m01..m10.js Contenido de cada módulo
+assets/js/datos/m01..m04.js Contenido de cada módulo
 ```
 
 El contenido vive en `assets/js/datos/*.js` como objetos JavaScript. Cada módulo se registra con:
@@ -77,6 +90,15 @@ python3 -m http.server 8000
 ```
 
 También funciona abriendo `index.html` directamente en el navegador.
+
+## Fuentes
+
+- Documentación oficial de AWS (definiciones, límites y precios).
+- Temario de AWS Academy Cloud Foundations, módulos 1 a 4.
+- Charla «La nube desde dentro: usuarios, proveedores y almacenamiento de objetos», de
+  Marcos García Martín (Software Engineer en MEGA S4), CIFP Avilés, 29 de octubre de 2026,
+  módulo Despliegue en la nube (MOC) 0492.
+- Reglamento (UE) 2023/2854 (Data Act), para las obligaciones de cambio de proveedor.
 
 ## Aviso
 

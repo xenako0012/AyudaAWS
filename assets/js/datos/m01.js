@@ -42,6 +42,15 @@
           ['SaaS (software)', 'Nada: solo usa el producto y sus datos', 'Absolutamente todo el stack', 'Amazon WorkMail, Google Workspace']
         ] },
         { t: 'nota', clase: 'examen', titulo: 'Truco de examen', c: 'Si la pregunta dice «el cliente se encarga del sistema operativo y de los parches» es IaaS. Si dice «solo se preocupa del código y los datos» es PaaS. Si «no administra nada» es SaaS.' },
+        { t: 'h', c: 'Serverless: la versión extrema de PaaS' },
+        { t: 'p', c: 'Dentro de PaaS existe una forma aún más delegada: el modelo **serverless**. No hay servidor que administrar ni capacidad reservada. Se escribe una función, se publica y el proveedor la ejecuta cuando llega una petición, cobrando por invocación y por milisegundos de ejecución. En AWS el exponente es **AWS Lambda**, acompañado de servicios que también se consumen sin aprovisionar nada, como Amazon S3, Amazon DynamoDB o Amazon API Gateway.' },
+        { t: 'tabla', cab: ['Situación', 'Qué encaja mejor', 'Por qué'], filas: [
+          ['Web estática o API con tráfico irregular', 'Serverless: Lambda + S3 + DynamoDB', 'Con cero tráfico la factura es cero: no hay máquina encendida esperando.'],
+          ['Procesos largos o estado en memoria', 'Servidor o contenedor: EC2, ECS', 'Las funciones tienen límite de tiempo y arranque en frío; no sirven para trabajos continuos.'],
+          ['Prototipo o proyecto de clase', 'Serverless o un VPS pequeño', 'Con pocas visitas, lo gestionado evita parchear y hacer copias a mano.'],
+          ['Carga alta y sostenida todo el día', 'Instancias reservadas o Savings Plans', 'El pago por invocación deja de compensar cuando el uso es constante.']
+        ] },
+        { t: 'nota', clase: 'tip', titulo: 'Serverless no significa «sin servidores»', c: 'Los servidores existen: lo que desaparece es **tu responsabilidad sobre ellos**. Sigues respondiendo del código, de los permisos y de los datos.' },
         { t: 'h', c: 'Modelos de despliegue' },
         { t: 'ul', c: [
           '**Nube pública:** los recursos son del proveedor y se comparten entre clientes. AWS, Azure y Google Cloud operan nubes públicas.',
@@ -65,11 +74,13 @@
         { t: 'Multi-tenant', d: 'Varios clientes comparten la misma infraestructura física de forma aislada.' },
         { t: 'Elasticidad', d: 'Capacidad de crecer y decrecer automáticamente según la demanda.' },
         { t: 'Nube híbrida', d: 'Combinación integrada de infraestructura propia y servicios de nube pública.' },
+        { t: 'Serverless', d: 'Modelo en el que el proveedor ejecuta código por petición y solo se paga la ejecución.' },
         { t: 'CapEx / OpEx', d: 'Gasto de capital (comprar activos) frente a gasto operativo (pagar por consumo).' }
       ],
       quiz: [
         { p: 'Una empresa alquila máquinas virtuales en AWS y se encarga de instalar el sistema operativo, el servidor web y la aplicación. ¿Qué modelo de servicio utiliza?', op: ['SaaS', 'PaaS', 'IaaS', 'FaaS'], ok: 2, e: 'Al gestionar el sistema operativo y el software de base, la empresa consume infraestructura como servicio (IaaS). En PaaS solo gestionaría la aplicación; en SaaS, nada.' },
         { p: '¿Cuál de estas afirmaciones describe mejor la característica de «servicio medido»?', op: ['El proveedor mide la satisfacción del cliente cada mes', 'El uso de los recursos se mide y se factura según el consumo real', 'El cliente debe medir la capacidad antes de contratarla', 'El servicio solo se puede medir con herramientas externas'], ok: 1, e: 'El servicio medido implica medición automática del consumo y facturación transparente por lo utilizado, sin necesidad de que el cliente mida nada.' },
+        { p: 'Una función Lambda se ejecuta solo cuando llega una petición y se factura por invocación. ¿Cómo se llama ese modelo?', op: ['IaaS', 'SaaS', 'Serverless', 'Nube privada'], ok: 2, e: 'El modelo serverless ejecuta código bajo demanda y cobra por ejecución, sin servidores que administrar ni capacidad reservada.' },
         { p: '¿Qué modelo de despliegue combina infraestructura local con servicios de nube pública integrados?', op: ['Nube privada', 'Nube híbrida', 'Nube comunitaria', 'Centro de datos tradicional'], ok: 1, e: 'La nube híbrida integra entornos locales con la nube pública, típicamente mediante conexiones dedicadas como AWS Direct Connect.' }
       ]
     },
@@ -104,6 +115,19 @@
           ['Escalabilidad', 'Crecer en capacidad de forma sostenida', 'Añadir nodos a un clúster de Amazon EKS']
         ] },
         { t: 'nota', clase: 'tip', titulo: 'No confundas…', c: '**Escalabilidad** es la capacidad de crecer; **elasticidad** es hacerlo de forma automática y reversible según la demanda. **Alta disponibilidad** reduce el tiempo de inactividad; **tolerancia a fallos** busca cero interrupción.' },
+        { t: 'h', c: 'Rendimiento: por qué la media engaña' },
+        { t: 'p', c: 'La nube promete capacidad, pero lo que el usuario percibe es **latencia**. Y la latencia no se juzga con una media, sino con **percentiles**: el valor por debajo del cual queda un porcentaje de las peticiones. El **p50** o mediana describe el caso típico; el **p90** y el **p99** describen la cola, esas peticiones que se atascan.' },
+        { t: 'ul', c: [
+          '**p50 (mediana):** la mitad de las peticiones tardan eso o menos. Es la experiencia normal.',
+          '**p90:** el 90 % cabe por debajo; el 10 % restante es más lento.',
+          '**p99,9:** solo una de cada mil peticiones es peor. En un servicio con millones de peticiones, sigue siendo mucha gente enfadada.'
+        ] },
+        { t: 'tabla', cab: ['Escenario', 'Cálculo', 'Duración'], filas: [
+          ['100.000 archivos, 2 subidas en paralelo, 0,2 s cada una', '100.000 × 0,2 s ÷ 2', '≈ 2 h 45 min'],
+          ['El 0,2 % (200 archivos) se atasca 300 s', '200 × 300 s ÷ 2', '≈ 8 h extra, es decir, ≈ 11 h en total']
+        ] },
+        { t: 'nota', clase: 'examen', titulo: 'La lección de la cola', c: 'Un porcentaje minúsculo de peticiones lentas puede **cuadruplicar** el tiempo total, porque bloquea los hilos disponibles. Por eso se prueba el peor caso y no solo el promedio.' },
+        { t: 'p', c: 'De ahí una conclusión contraintuitiva: dividir un archivo grande en muchos trozos para subirlos en paralelo **no siempre acelera**. Cuantas más peticiones se hacen, más probable es que alguna caiga en la cola lenta. Sin datos de percentiles, optimizar a ciegas puede empeorar el resultado.' },
         { t: 'h', c: 'Riesgos que conviene gestionar' },
         { t: 'ul', c: [
           '**Dependencia del proveedor:** usar servicios muy específicos dificulta cambiar de nube. Se mitiga con arquitecturas portables y contenedores.',
@@ -118,11 +142,13 @@
         { t: 'Economías de escala', d: 'Reducción de coste unitario al comprar y operar a gran volumen.' },
         { t: 'Agilidad', d: 'Velocidad para experimentar, iterar y desplegar cambios.' },
         { t: 'Durabilidad', d: 'Capacidad de un sistema de conservar los datos sin pérdida.' },
+        { t: 'Percentil', d: 'Valor por debajo del cual queda un porcentaje dado de las mediciones de latencia.' },
         { t: 'Tolerancia a fallos', d: 'Capacidad de seguir operando aunque falle un componente.' }
       ],
       quiz: [
         { p: '¿Cuál de estas es una de las seis ventajas de la informática en la nube según AWS?', op: ['Eliminar por completo la necesidad de seguridad', 'Convertir un gasto de capital en un gasto variable', 'Garantizar que la factura mensual sea siempre la misma', 'Evitar tener que diseñar la arquitectura'], ok: 1, e: 'La primera ventaja es convertir CapEx en OpEx: se paga por consumo en lugar de comprar infraestructura por adelantado.' },
         { p: 'Una plataforma de vídeo experimenta picos enormes en estrenos y muy poco tráfico el resto del mes. ¿Qué beneficio de la nube aprovecha principalmente?', op: ['Economías de escala', 'Elasticidad', 'Alcance global', 'Durabilidad'], ok: 1, e: 'La elasticidad permite ampliar capacidad durante los picos y reducirla después, pagando solo por lo usado.' },
+        { p: 'En una migración de 100.000 archivos, solo el 0,2 % de las subidas se atasca cinco minutos. ¿Por qué el tiempo total casi se cuadruplica?', op: ['Porque la media aritmética sube mucho', 'Porque las peticiones lentas bloquean los hilos disponibles', 'Porque AWS limita las subidas pequeñas', 'Porque el ancho de banda baja al llegar a 100.000 objetos'], ok: 1, e: 'La cola lenta ocupa los hilos de subida; por eso se mide con percentiles (p90, p99) y no con la media.' },
         { p: 'La afirmación «Amazon S3 está diseñado para una durabilidad del 99,999999999 %» se refiere a…', op: ['La probabilidad de que el servicio esté disponible', 'La probabilidad de no perder un objeto almacenado', 'La velocidad de descarga de un objeto', 'El tiempo que tarda en replicarse entre regiones'], ok: 1, e: 'Durabilidad mide la probabilidad de conservar los datos; la disponibilidad (99,99 %) mide el tiempo que el servicio responde.' }
       ]
     },
@@ -151,6 +177,18 @@
           ['Facturación y costes', 'Controlar el gasto', 'AWS Cost Explorer, AWS Budgets, AWS Organizations']
         ] },
         { t: 'nota', clase: 'examen', titulo: 'Preguntas típicas', c: '«¿Qué servicio permite…?» suele resolverse identificando la categoría. Si habla de objetos → S3. De bloques para una instancia → EBS. De archivos compartidos → EFS. De colas → SQS. De notificaciones pub/sub → SNS.' },
+        { t: 'h', c: 'Quién trabaja con la nube' },
+        { t: 'p', c: 'Una plataforma en la nube no la mantiene una sola persona: es un trabajo en equipo con roles bastante definidos. Reconocerlos ayuda a entender qué tareas asume cada perfil y por qué la formación en cloud es transversal a toda la empresa.' },
+        { t: 'tabla', cab: ['Rol', 'En qué se centra'], filas: [
+          ['Desarrollador/a', 'El código del producto y sus pruebas.'],
+          ['Arquitecto/a cloud', 'Diseñar soluciones sobre AWS, Azure o Google Cloud: qué servicios, cómo se comunican y cuánto cuestan.'],
+          ['DevOps', 'Llevar la aplicación de local a producción: automatizar pruebas y despliegues hasta que desplegar sea pulsar un botón.'],
+          ['Ingeniería de plataforma', 'Los raíles comunes sobre los que el resto despliega: plantillas, pipelines, entornos.'],
+          ['SRE', 'Mantenimiento y vigilancia: que todo siga funcionando y que los incidentes se detecten y analicen.'],
+          ['QA', 'Comprobar que las cosas funcionan antes de que lleguen al usuario.'],
+          ['Seguridad y datos', 'Proteger la información, gestionar identidades y cumplir la normativa.']
+        ] },
+        { t: 'nota', clase: 'dato', titulo: 'Equipos pequeños, roles mezclados', c: 'En una empresa pequeña la misma persona hace de desarrolladora, de DevOps y de SRE. En una grande, cada rol tiene su equipo y sus herramientas. Los conceptos, en cambio, son los mismos.' },
         { t: 'h', c: 'Cómo se accede a AWS' },
         { t: 'ul', c: [
           '**Consola de administración:** interfaz web gráfica, ideal para aprender y para tareas puntuales.',
@@ -171,6 +209,8 @@
         { t: 'AWS CLI', d: 'Herramienta de línea de comandos que llama a la API de AWS.' },
         { t: 'SDK', d: 'Kit de desarrollo con bibliotecas para integrar AWS en el código de una aplicación.' },
         { t: 'AWS CAF', d: 'Marco de adopción de la nube con seis perspectivas para guiar la transformación.' },
+        { t: 'SRE', d: 'Ingeniería de fiabilidad: mantener el servicio funcionando y analizar los incidentes.' },
+        { t: 'DevOps', d: 'Cultura y práctica de automatizar la entrega de software desde el código a producción.' },
         { t: 'Región', d: 'Área geográfica aislada que agrupa zonas de disponibilidad.' }
       ],
       quiz: [
@@ -229,6 +269,22 @@
           ['AWS Migration Hub', 'Seguimiento centralizado del progreso de las migraciones.'],
           ['AWS Transfer Family', 'Mueve datos por SFTP, FTPS y FTP a Amazon S3 o EFS.']
         ] },
+        { t: 'h', c: 'Cómo elegir proveedor' },
+        { t: 'p', c: 'Antes de migrar hay que elegir destino, y la decisión no se reduce al precio por hora. Estos son los criterios que de verdad pesan con el tiempo:' },
+        { t: 'tabla', cab: ['Criterio', 'Qué mirar'], filas: [
+          ['Presencia geográfica', 'Regiones cercanas a tus usuarios: la latencia se arregla con distancia, no con dinero.'],
+          ['Servicios y ecosistema', 'Que exista lo que necesitas (base de datos gestionada, colas, IA) sin montarlo a mano.'],
+          ['Capa gratuita y soporte', 'Poder experimentar sin coste y tener un canal técnico cuando algo falla.'],
+          ['Precio al escalar', 'No solo el precio de entrada: cuánto cuesta el terabyte, la petición y la salida cuando crezcas.'],
+          ['Coste de salida', 'Cuánto cuesta llevarte los datos y cuánto trabajo exige reescribir la aplicación.'],
+          ['Capacidad de negociación', '10 PB no significan nada para un hiperescalador, pero pueden convertirte en el mayor cliente de uno pequeño.'],
+          ['Modelo de precio', 'Pago por uso o compromiso a uno, dos o tres años con descuento.']
+        ] },
+        { t: 'nota', clase: 'tip', titulo: 'El más barato depende del consumo', c: 'Existen comparadores de precios de VPS, GPU y almacenamiento de objetos. El proveedor más económico cambia según el volumen: con 1 TB gana uno y con 100 TB gana otro. Calcula con tus cifras, no con las del folleto.' },
+        { t: 'h', c: 'Lock-in: la dependencia del proveedor' },
+        { t: 'p', c: 'Se llama **lock-in** a depender tanto de un proveedor que cambiar resulte caro o inviable. La historia tiene ejemplos en las dos direcciones: **Dropbox** nació sobre Amazon S3 y, al crecer y pagar cifras millonarias por el almacenamiento, terminó montando su propia infraestructura; **Netflix** mantiene su catálogo en AWS y ha construido otros servicios propios alrededor. No es una decisión moral, es económica.' },
+        { t: 'p', c: 'En Europa el **Reglamento de Datos (Data Act, Reglamento UE 2023/2854)** aplica desde el **12 de septiembre de 2025** y obliga a facilitar el cambio de proveedor: preaviso máximo de dos meses, un periodo de transición de unos 30 días y derecho a recuperar los datos después. Los costes de cambio están limitados a los costes reales y **desaparecen el 12 de enero de 2027**.' },
+        { t: 'nota', clase: 'examen', titulo: 'Portabilidad no es gratis', c: 'Que la ley obligue a facilitar la salida no significa que tu aplicación funcione igual en otra nube: servicios propietarios, permisos y formatos siguen siendo tu responsabilidad. Diseñar con contenedores y estándares abiertos (S3, SQL, Kubernetes) reduce el lock-in.' },
         { t: 'h', c: 'Buenas prácticas antes de migrar' },
         { t: 'ul', c: [
           '**Inventariar** todas las aplicaciones, dependencias y flujos de datos antes de mover nada.',
@@ -245,6 +301,8 @@
         { t: 'Replatform', d: 'Moverla aplicando optimizaciones puntuales.' },
         { t: 'Refactorizar', d: 'Rediseñar la aplicación aprovechando servicios nativos de nube.' },
         { t: 'AWS DMS', d: 'Servicio gestionado para migrar bases de datos con mínima interrupción.' },
+        { t: 'Lock-in', d: 'Dependencia excesiva de un proveedor que encarece o impide cambiar de nube.' },
+        { t: 'Data Act', d: 'Reglamento europeo que obliga a facilitar el cambio de proveedor de nube.' },
         { t: 'CCoE', d: 'Cloud Center of Excellence: equipo que define las buenas prácticas de nube en la organización.' }
       ],
       quiz: [

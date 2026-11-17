@@ -48,6 +48,16 @@
           ['Gestionado — Amazon RDS', 'Motor, parches, copias automáticas', 'Esquema, usuarios de la base de datos, cifrado, red']
         ] },
         { t: 'nota', clase: 'tip', titulo: 'Cuanto más gestionado, menos responsabilidad', c: 'Al pasar de EC2 a Lambda o a un servicio SaaS, el cliente conserva siempre la responsabilidad sobre **sus datos y sus identidades**, pero delega cada vez más capas de infraestructura.' },
+        { t: 'h', c: 'Mirar desde el otro lado: qué hace el proveedor' },
+        { t: 'p', c: 'Si te pones en el lugar de quien opera el servicio, la lista de tareas propias cambia por completo. Un proveedor no solo alquila máquinas: asume la seguridad física y lógica de la plataforma, y con ella la de los datos de todos sus clientes.' },
+        { t: 'ul', c: [
+          '**Seguridad perimetral permanente:** en cuanto algo se publica en internet llegan los bots, los escaneos de puertos y los intentos de inyección, incluso en un simple formulario de contacto.',
+          '**Pruebas automatizadas y comprobaciones de estado (health checks)** para detectar componentes caídos antes de que lo note el cliente.',
+          '**Registro de cada petición:** depurar con mensajes sueltos no es una opción; hacen falta trazas y paneles de observabilidad.',
+          '**Alertas técnicas y de gasto:** un pico de errores o de consumo es una señal de incidente.',
+          '**Parcheo continuo** del sistema operativo, del hipervisor y de las dependencias del software propio.'
+        ] },
+        { t: 'nota', clase: 'examen', titulo: 'Dónde está la frontera', c: 'El proveedor responde de la plataforma, no de lo que tú configures en ella. Un bucket público o una clave expuesta en un repositorio son responsabilidad del cliente, aunque el servicio sea impecable.' },
         { t: 'h', c: 'Controles compartidos' },
         { t: 'p', c: 'Algunos controles se aplican en ambas partes con distinto alcance:' },
         { t: 'ul', c: [
@@ -184,6 +194,16 @@
         ] },
         { t: 'h', c: 'AWS Account Setup y Control Tower' },
         { t: 'p', c: 'AWS ofrece una experiencia guiada de **configuración de seguridad** que aplica varias de estas tareas en pocos clics. Para organizaciones con muchas cuentas, **AWS Control Tower** crea una *landing zone* con registro centralizado, acceso federado, guardrails y cuentas preconfiguradas, evitando repetir la lista a mano en cada cuenta.' },
+        { t: 'h', c: 'Revisar la seguridad de tu propio proyecto' },
+        { t: 'p', c: 'Las herramientas de AWS cubren la infraestructura, pero el código y las dependencias también son superficie de ataque. Estas comprobaciones deberían formar parte de la rutina de cualquier proyecto desplegado en la nube:' },
+        { t: 'tabla', cab: ['Herramienta o práctica', 'Qué aporta'], filas: [
+          ['Dependabot (GitHub)', 'Avisa de dependencias con vulnerabilidades conocidas o muy desactualizadas, y propone la actualización.'],
+          ['npm audit y equivalentes', 'Analiza el árbol de dependencias del proyecto y lista los fallos conocidos.'],
+          ['OWASP Top 10', 'Catálogo de los riesgos más habituales en aplicaciones web y guía para comprobarlos.'],
+          ['Alertas del proveedor cloud', 'AWS avisa cuando detecta un recurso público que no debería serlo.'],
+          ['Parcheo periódico', 'Aplicar actualizaciones es parte del trabajo, no una tarea opcional.']
+        ] },
+        { t: 'nota', clase: 'tip', titulo: 'Automatiza la revisión', c: 'Un pipeline que ejecuta el análisis de dependencias y el escaneo de secretos en cada push cuesta menos que descubrir la fuga en producción. Si una clave llega al repositorio, considérala comprometida y rótala.' },
         { t: 'h', c: 'Errores frecuentes al empezar' },
         { t: 'ul', c: [
           'Dejar la cuenta raíz sin MFA y usarla a diario.',
@@ -314,7 +334,17 @@
           '**MFA Delete:** exige MFA para borrar versiones de objetos.'
         ] },
         { t: 'h', c: 'Copias de seguridad y recuperación' },
-        { t: 'p', c: 'Una copia que nunca se ha restaurado no es una copia. **AWS Backup** centraliza políticas de copia para EBS, RDS, DynamoDB, EFS, S3 y otros servicios, con planes, bóvedas y bloqueo (Vault Lock). Conviene definir **RPO** (cuántos datos se pueden perder) y **RTO** (cuánto tiempo se puede tardar en recuperar), y probar la restauración periódicamente.' }
+        { t: 'p', c: 'Una copia que nunca se ha restaurado no es una copia. **AWS Backup** centraliza políticas de copia para EBS, RDS, DynamoDB, EFS, S3 y otros servicios, con planes, bóvedas y bloqueo (Vault Lock). Conviene definir **RPO** (cuántos datos se pueden perder) y **RTO** (cuánto tiempo se puede tardar en recuperar), y probar la restauración periódicamente.' },
+        { t: 'h', c: 'Copias de seguridad en tres niveles' },
+        { t: 'p', c: 'Tener «una copia» es tener una copia en el mismo sitio que el original, y eso no protege de un incendio, un borrado accidental ni un ransomware. La estrategia habitual establece tres niveles, cada uno con su función:' },
+        { t: 'ol', c: [
+          '**Copia rápida y local al servicio:** instantáneas de EBS, copias automáticas de RDS o versionado de S3. Recuperan en minutos un borrado o una modificación accidental.',
+          '**Copia en otra zona o región:** protege frente al fallo de un edificio o de una región completa, el caso del incendio de un centro de datos.',
+          '**Copia aislada e inmutable:** en otra cuenta, con bloqueo de bóveda o almacenamiento inmutable, para que nadie pueda borrarla, ni siquiera con credenciales robadas.'
+        ] },
+        { t: 'nota', clase: 'examen', titulo: 'La regla 3-2-1', c: '**Tres** copias de los datos, en **dos** medios o sistemas distintos, con **una** fuera de las instalaciones. La versión moderna añade: una copia inmutable y probada.' },
+        { t: 'nota', clase: 'aviso', titulo: 'Ransomware y copias en línea', c: 'Si el atacante puede acceder a tus credenciales, también puede borrar tus copias. Por eso las copias críticas se guardan en una cuenta separada, con MFA y bloqueo de retención.' },
+
       ],
       terminos: [
         { t: 'Cifrado en reposo', d: 'Protección de datos almacenados mediante cifrado del medio o del objeto.' },
@@ -322,11 +352,14 @@
         { t: 'KMS', d: 'Servicio gestionado de creación y control de claves criptográficas.' },
         { t: 'Cifrado de sobre', d: 'Cifrar datos con una clave de datos y esta con una clave maestra.' },
         { t: 'Macie', d: 'Servicio que descubre y clasifica datos sensibles almacenados en S3.' },
+        { t: 'Regla 3-2-1', d: 'Tres copias de los datos, en dos sistemas distintos y una fuera de las instalaciones.' },
+        { t: 'Inmutabilidad (Object Lock)', d: 'Configuración que impide modificar o borrar un objeto o una copia durante un plazo.' },
         { t: 'RPO / RTO', d: 'Punto objetivo de recuperación (datos perdidos) y tiempo objetivo de recuperación.' }
       ],
       quiz: [
         { p: '¿Qué patrón utiliza AWS KMS para cifrar grandes volúmenes de datos de forma eficiente?', op: ['Cifrado simétrico directo con la clave maestra', 'Cifrado de sobre: clave de datos cifrada por la clave maestra', 'Cifrado asimétrico de cada objeto', 'Ofuscación de datos'], ok: 1, e: 'El cifrado de sobre usa una clave de datos por objeto y cifra esa clave con la clave maestra de KMS.' },
         { p: 'Necesitas descubrir si hay números de tarjeta de crédito en buckets de S3. ¿Qué servicio usarías?', op: ['Amazon Macie', 'AWS WAF', 'Amazon Inspector', 'AWS Shield'], ok: 0, e: 'Macie usa machine learning para descubrir datos sensibles como PII en S3.' },
+        { p: 'Quieres que ni siquiera alguien con tus credenciales pueda borrar las copias de seguridad. ¿Qué nivel de protección necesitas?', op: ['Una copia en la misma zona de disponibilidad', 'Versionado de S3 únicamente', 'Una copia en otra cuenta con bloqueo de bóveda o almacenamiento inmutable', 'Un plan de soporte Business'], ok: 2, e: 'Aislar las copias en otra cuenta y bloquear su borrado protege frente a errores, credenciales robadas y ransomware.' },
         { p: '¿Qué significa RTO en un plan de recuperación?', op: ['El tiempo máximo aceptable para restaurar el servicio', 'La cantidad máxima de datos que se puede perder', 'El coste máximo de la recuperación', 'El número de copias de seguridad necesarias'], ok: 0, e: 'RTO (Recovery Time Objective) es el tiempo objetivo de recuperación; RPO es la cantidad de datos que se puede perder.' }
       ]
     },

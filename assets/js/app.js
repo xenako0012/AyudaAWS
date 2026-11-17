@@ -42,6 +42,15 @@
     });
   });
 
+  var TERMINOS_UNICOS = (function () {
+    var vistos = {}, n = 0;
+    TERMINOS.forEach(function (x) {
+      var k = normaliza(x.t.t);
+      if (!vistos[k]) { vistos[k] = true; n++; }
+    });
+    return n;
+  })();
+
   /* ---------- Estado ---------- */
   var estado = {
     progreso: cargarProgreso(),
@@ -359,7 +368,7 @@
     var hero = '<section class="hero">' +
       '<span class="hero__etiqueta">AWS Academy · Cloud Foundations</span>' +
       '<h1>Domina los fundamentos de la nube de <em>AWS</em></h1>' +
-      '<p class="hero__sub">Los 10 módulos del curso, explicados en español y con vocación práctica: conceptos de nube, precios, infraestructura global, seguridad, redes, cómputo, almacenamiento, bases de datos, arquitectura y escalado. Con cuestionarios y simulacro de examen incluidos.</p>' +
+      '<p class="hero__sub">Los cuatro primeros módulos del curso, explicados en español y con vocación práctica: conceptos de nube, precios y economía, infraestructura global y seguridad. Incluye el material de la charla «La nube desde dentro» sobre proveedores, almacenamiento de objetos y rendimiento.</p>' +
       '<div class="hero__acciones">' +
       '<a class="btn btn--primario" href="#/seccion/' + primeroPendiente.seccion.id + '">' + (empezado ? 'Continuar el curso' : 'Empezar por el módulo 1') + ICO.flecha + '</a>' +
       '<a class="btn btn--fantasma" href="#/examen">Simulacro de examen</a>' +
@@ -368,7 +377,7 @@
       '<div><dt>' + MODULOS.length + '</dt><dd>Módulos</dd></div>' +
       '<div><dt>' + TOTAL_SECCIONES + '</dt><dd>Secciones</dd></div>' +
       '<div><dt>' + cifras(nPreguntas) + '</dt><dd>Preguntas</dd></div>' +
-      '<div><dt>' + TERMINOS.length + '</dt><dd>Términos clave</dd></div>' +
+      '<div><dt>' + TERMINOS_UNICOS + '</dt><dd>Términos clave</dd></div>' +
       '</dl></section>';
 
     var continuar = empezado ? '<section class="bloque-seccion" style="margin-top:1.6rem">' +
@@ -409,7 +418,7 @@
 
     return hero + continuar +
       '<section class="bloque-seccion">' +
-      '<div class="titulo-seccion"><h2>Los 10 módulos</h2><p>De los conceptos básicos a la arquitectura elástica</p></div>' +
+      '<div class="titulo-seccion"><h2>Los cuatro módulos</h2><p>De los conceptos básicos a la seguridad</p></div>' +
       '<div class="rejilla-modulos">' + moduloCards + '</div>' +
       '</section>' +
 
@@ -825,11 +834,10 @@
   /* ---------- Vista: recursos ---------- */
   function vistaRecursos() {
     var plan = [
-      ['Semana 1', 'Módulos 1 a 3', 'Conceptos de nube, economía y facturación, infraestructura global'],
-      ['Semana 2', 'Módulos 4 y 5', 'Seguridad, IAM, VPC, Route 53 y CloudFront'],
-      ['Semana 3', 'Módulos 6 a 8', 'Cómputo, almacenamiento y bases de datos'],
-      ['Semana 4', 'Módulos 9 y 10', 'Well-Architected, Trusted Advisor, ELB, CloudWatch y Auto Scaling'],
-      ['Repaso', 'Simulacros', 'Dos simulacros completos y repaso de las secciones falladas']
+      ['Semana 1', 'Módulos 1 y 2', 'Conceptos de nube, ventajas, AWS, migración, precios, TCO, Organizations y soporte'],
+      ['Semana 2', 'Módulo 3', 'Regiones y zonas de disponibilidad, incidentes reales, catálogo de servicios y almacenamiento de objetos'],
+      ['Semana 3', 'Módulo 4', 'Responsabilidad compartida, IAM, protección de cuentas y de datos, conformidad'],
+      ['Semana 4', 'Repaso y simulacros', 'Cuestionarios fallados, percentiles, costes y dos simulacros completos']
     ].map(function (f) {
       return '<tr><td><strong>' + f[0] + '</strong></td><td>' + f[1] + '</td><td>' + f[2] + '</td></tr>';
     }).join('');
@@ -874,7 +882,15 @@
       '</div>' +
 
       '<div class="bloque-seccion"><div class="titulo-seccion"><h2>Sobre este sitio</h2><p>Material didáctico independiente</p></div>' +
-      '<p style="color:var(--texto-suave);max-width:75ch">Contenido elaborado en español a partir de la documentación pública de AWS y del temario de AWS Academy Cloud Foundations. No es un curso oficial de Amazon Web Services ni reproduce material propietario del curso. Las cifras de precios, límites y número de regiones cambian con el tiempo: confirma siempre los datos en la documentación oficial antes de tomar decisiones de producción.</p></div>';
+      '<p style="color:var(--texto-suave);max-width:75ch">Contenido elaborado en español a partir de la documentación pública de AWS y del temario de AWS Academy Cloud Foundations. No es un curso oficial de Amazon Web Services ni reproduce material propietario del curso. Las cifras de precios, límites y número de regiones cambian con el tiempo: confirma siempre los datos en la documentación oficial antes de tomar decisiones de producción.</p></div>' +
+
+      '<div class="bloque-seccion"><div class="titulo-seccion"><h2>Fuentes</h2><p>De dónde sale este material</p></div>' +
+      '<ul style="color:var(--texto-suave);max-width:75ch;line-height:1.75">' +
+      '<li><strong>Documentación oficial de AWS</strong>: definiciones, límites y precios de cada servicio.</li>' +
+      '<li><strong>Temario de AWS Academy Cloud Foundations</strong>, módulos 1 a 4: conceptos de nube, facturación y economía, infraestructura global y seguridad.</li>' +
+      '<li><strong>Charla «La nube desde dentro: usuarios, proveedores y almacenamiento de objetos»</strong>, de Marcos García Martín (Software Engineer en MEGA S4), impartida en el CIFP Avilés el 29 de octubre de 2026 dentro del módulo Despliegue en la nube (MOC) 0492. De ella proceden los apartados sobre roles profesionales, incidentes reales, coste del egress, elección de proveedor, almacenamiento de objetos, percentiles, HLS y CDN.</li>' +
+      '<li><strong>Reglamento (UE) 2023/2854 (Data Act)</strong>: obligaciones de cambio de proveedor, plazos y costes de salida.</li>' +
+      '</ul></div>';
   }
 
   /* ---------- Buscador ---------- */
@@ -995,7 +1011,7 @@
   }
 
   function sugerencias() {
-    var orden = ['m1s1', 'm4s1', 'm4s2', 'm6s2', 'm7s2', 'm8s2', 'm10s3'];
+    var orden = ['m1s1', 'm2s1', 'm3s1', 'm4s1', 'm4s2', 'm3s2', 'm4s5'];
     return orden.map(function (id) {
       var item = INDICE_SEC[id];
       if (!item) return null;
