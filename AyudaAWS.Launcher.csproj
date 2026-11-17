@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <AssemblyName>AyudaAWS</AssemblyName>
+    <RootNamespace>AyudaAWS</RootNamespace>
+    <ApplicationIcon>AyudaAWS.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="index.html" LogicalName="site/index.html" />
+    <EmbeddedResource Include="assets/**/*" LogicalName="site/assets/%(RecursiveDir)%(Filename)%(Extension)" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
+  </ItemGroup>
+</Project>

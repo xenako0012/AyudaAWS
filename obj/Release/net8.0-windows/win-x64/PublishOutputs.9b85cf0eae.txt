@@ -1,0 +1,12 @@
+C:\Users\xosemiguel.belda\Documents\GitHub\AyudaAWS\dist\AyudaAWS.pdb
+C:\Users\xosemiguel.belda\Documents\GitHub\AyudaAWS\dist\runtimes\win-x64\native\WebView2Loader.dll
+C:\Users\xosemiguel.belda\Documents\GitHub\AyudaAWS\dist\D3DCompiler_47_cor3.dll
+C:\Users\xosemiguel.belda\Documents\GitHub\AyudaAWS\dist\PenImc_cor3.dll
+C:\Users\xosemiguel.belda\Documents\GitHub\AyudaAWS\dist\PresentationNative_cor3.dll
+C:\Users\xosemiguel.belda\Documents\GitHub\AyudaAWS\dist\vcruntime140_cor3.dll
+C:\Users\xosemiguel.belda\Documents\GitHub\AyudaAWS\dist\wpfgfx_cor3.dll
+C:\Users\xosemiguel.belda\Documents\GitHub\AyudaAWS\dist\WebView2Loader.dll
+C:\Users\xosemiguel.belda\Documents\GitHub\AyudaAWS\dist\Microsoft.Web.WebView2.Core.xml
+C:\Users\xosemiguel.belda\Documents\GitHub\AyudaAWS\dist\Microsoft.Web.WebView2.WinForms.xml
+C:\Users\xosemiguel.belda\Documents\GitHub\AyudaAWS\dist\Microsoft.Web.WebView2.Wpf.xml
+C:\Users\xosemiguel.belda\Documents\GitHub\AyudaAWS\dist\AyudaAWS.exe

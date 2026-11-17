@@ -70,6 +70,7 @@
     });
     s = esc(s);
     s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/(^|[\s(¡¿"'.,;:])\*([^*]+)\*/g, '$1<em>$2</em>');
     s = s.replace(/(^|[\s(¡¿"'.,;:])_([^_]+)_/g, '$1<em>$2</em>');
     s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_, texto, url) {
       var externo = /^https?:/i.test(url);

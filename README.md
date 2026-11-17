@@ -78,6 +78,16 @@ python3 -m http.server 8000
 
 También funciona abriendo `index.html` directamente en el navegador.
 
+## Ejecutable para Windows
+
+En `dist/AyudaAWS.exe` hay una aplicación para Windows x64 que abre el curso en su propia ventana, sin interfaz de navegador. No requiere instalar .NET y el ejecutable incluye la página y sus recursos. Sí requiere Microsoft Edge WebView2 Runtime, que ya suele estar instalado en Windows; si falta, se puede instalar desde la página oficial de Microsoft.
+
+Para recompilarlo con el SDK de .NET 8 o posterior:
+
+```powershell
+dotnet publish .\AyudaAWS.Launcher.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o .\dist
+```
+
 ## Aviso
 
 Material didáctico independiente elaborado a partir de documentación pública de AWS y del
