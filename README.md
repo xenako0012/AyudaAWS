@@ -2,7 +2,8 @@
 
 Sitio web estático, sin dependencias ni proceso de compilación, con los **cuatro primeros
 módulos** de **AWS Academy Cloud Foundations** explicados en español: 4 módulos,
-17 secciones, 57 preguntas de autoevaluación y 101 términos de glosario.
+17 secciones, 57 preguntas de repaso, 98 términos de glosario y las **40 preguntas del
+examen del curso** con su respuesta oficial.
 
 Está ampliado con el material de la charla **«La nube desde dentro: usuarios, proveedores
 y almacenamiento de objetos»** (Marcos García Martín, MEGA S4, CIFP Avilés, 29 de octubre
@@ -35,14 +36,27 @@ notas orientadas al examen, términos clave y un cuestionario con explicaciones.
 | Dependabot, OWASP y revisión de dependencias del propio proyecto | 4.3 |
 | Copias de seguridad en tres niveles, regla 3-2-1 e inmutabilidad | 4.5 |
 
+## Examen del curso
+
+Las 40 preguntas oficiales del examen (4 temas × 10 preguntas) con su respuesta literal,
+en tres modos de estudio:
+
+| Modo | Qué hace |
+| --- | --- |
+| **Estudio** | Las 40 preguntas y respuestas seguidas, con opción de ocultar las respuestas para autoevaluarse |
+| **Tarjetas** | Una pregunta por pantalla, respuesta tras un botón, y marcas «la sabía» / «a repasar» (se guardan en `localStorage`) |
+| **Test** | Opción múltiple por tema o completa, con corrección inmediata o modo examen y revisión final |
+
+Las respuestas son las del examen, sin reescribir. Las opciones incorrectas del test son
+versiones plausibles de cada respuesta, para comprobar que se distingue el matiz.
+
 ## Funciones
 
 - **Navegación por módulos y secciones** con barra lateral, migas y enlaces anterior/siguiente.
 - **Buscador global** (`Ctrl` + `K` o `/`) sobre secciones, módulos y glosario.
 - **Progreso guardado** en `localStorage`: porcentaje, secciones completadas por módulo y reinicio.
 - **Cuestionarios** con corrección inmediata y explicación de cada respuesta.
-- **Simulacro de examen** configurable (10–40 preguntas, por módulo o global) en modo práctica
-  o modo examen, con revisión final de todas las preguntas.
+- **Examen del curso** con las 40 preguntas oficiales en modo estudio, tarjetas y test.
 - **Glosario** alfabético con filtro por texto y por módulo.
 - **Tema claro/oscuro**, diseño responsive y estilos de impresión (PDF).
 
@@ -53,6 +67,7 @@ index.html                  Estructura, navegación y contenedores
 assets/css/estilos.css      Diseño completo (temas, componentes, responsive, impresión)
 assets/js/app.js            Router por hash, render, progreso, buscador, quiz y examen
 assets/js/datos/m01..m04.js Contenido de cada módulo
+assets/js/datos/examen.js   40 preguntas oficiales del examen y sus opciones
 ```
 
 El contenido vive en `assets/js/datos/*.js` como objetos JavaScript. Cada módulo se registra con:
@@ -79,6 +94,19 @@ El contenido vive en `assets/js/datos/*.js` como objetos JavaScript. Cada módul
 ```
 
 Clases de nota disponibles: `examen`, `tip`, `aviso`, `dato`.
+
+El examen vive en un archivo aparte con esta forma:
+
+```js
+(window.EXAMEN = window.EXAMEN || []).push({
+  id: 't1', numero: 1, titulo: '…', seccion: 'm1s1',
+  preguntas: [
+    { p: 'Pregunta', r: 'Respuesta oficial', op: ['a', 'b', 'c', 'd'], ok: 2 }
+  ]
+});
+```
+
+`seccion` enlaza cada tema con la sección del temario que lo desarrolla.
 
 ## Uso local
 

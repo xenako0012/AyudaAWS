@@ -73,8 +73,9 @@ DIR_FUENTES = '/usr/share/fonts/truetype/dejavu'
 
 ETIQUETAS_APENDICE = {
     'Apéndice A': 'Guía del examen CLF-C02',
-    'Apéndice B': 'Soluciones',
-    'Apéndice C': 'Glosario',
+    'Apéndice B': 'Examen del curso',
+    'Apéndice C': 'Soluciones',
+    'Apéndice D': 'Glosario',
 }
 
 TITULOS_CORTOS = {
@@ -1128,7 +1129,7 @@ def apendice_examen(modulos, preguntas):
 
 
 def apendice_soluciones(modulos):
-    e = apendice('Apéndice B', 'B', 'Soluciones de las autoevaluaciones',
+    e = apendice('Apéndice C', 'C', 'Soluciones de las autoevaluaciones',
                  'Cada respuesta incluye la explicación de por qué es correcta. Si has '
                  'fallado, vuelve a la sección correspondiente.')
     for m in modulos:
@@ -1153,7 +1154,7 @@ def apendice_soluciones(modulos):
 
 
 def apendice_glosario(terminos):
-    e = apendice('Apéndice C', 'C', 'Glosario',
+    e = apendice('Apéndice D', 'D', 'Glosario',
                  '%d términos esenciales, ordenados alfabéticamente. La referencia entre '
                  'paréntesis indica el módulo donde se explica cada uno.' % len(terminos))
 
@@ -1188,6 +1189,42 @@ def cargar_contenido():
     salida = subprocess.run(['node', '-e', script], cwd=RAIZ,
                             capture_output=True, text=True, check=True)
     return json.loads(salida.stdout)
+
+
+def cargar_examen():
+    script = (
+        "global.window={};"
+        "require('./assets/js/datos/examen.js');"
+        "process.stdout.write(JSON.stringify(window.EXAMEN));"
+    )
+    salida = subprocess.run(['node', '-e', script], cwd=RAIZ,
+                            capture_output=True, text=True, check=True)
+    return json.loads(salida.stdout)
+
+
+def apendice_examen_curso(temas):
+    total = sum(len(t['preguntas']) for t in temas)
+    e = apendice('Apéndice B', 'B', 'Examen del curso',
+                 'Las %d preguntas del examen con su respuesta literal, agrupadas por tema. '
+                 'Tapa la respuesta con la mano, contéstala en voz alta y compruébala '
+                 'después: es la forma más rápida de detectar lo que aún no controlas.'
+                 % total)
+    for t in temas:
+        e.append(Paragraph('Tema %d · %s' % (t['numero'], en_linea(t['titulo'])),
+                           ParagraphStyle('exh', parent=ST['H3'], spaceBefore=16,
+                                          fontSize=11, textColor=NAVY)))
+        for i, q in enumerate(t['preguntas'], 1):
+            e.append(Spacer(1, 7))
+            e.append(Paragraph('%d. %s' % (i, en_linea(q['p'])),
+                               ParagraphStyle('exp', parent=ST['Body'],
+                                              fontName='SerifBold', fontSize=8.9,
+                                              leading=12.4, spaceAfter=2,
+                                              keepWithNext=1)))
+            e.append(Paragraph(en_linea(q['r']),
+                               ParagraphStyle('exr', parent=ST['Body'], fontSize=8.6,
+                                              leading=12.2, textColor=GRIS,
+                                              leftIndent=12, spaceAfter=0)))
+    return e
 
 
 def normaliza(texto):
@@ -1289,6 +1326,10 @@ def construir():
 
     for m in modulos:
         guion.extend(capitulo(m, m['numero']))
+
+    guion.append(NextPageTemplate('capitulo'))
+    guion.append(PageBreak())
+    guion.extend(apendice_examen_curso(cargar_examen()))
 
     guion.append(NextPageTemplate('capitulo'))
     guion.append(PageBreak())

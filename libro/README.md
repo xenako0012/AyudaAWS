@@ -8,8 +8,9 @@ imprimir en casa.
 - Portadilla con los cuatro módulos, su duración y número de secciones.
 - Los **4 módulos · 17 secciones** completos: objetivos, explicaciones, tablas,
   esquemas, notas de examen y tres o cuatro preguntas de autoevaluación por sección.
-- **Apéndice B**: soluciones razonadas de las 57 preguntas.
-- **Apéndice C**: glosario alfabético de 98 términos con el módulo de referencia.
+- **Apéndice B**: las 40 preguntas del examen del curso (4 temas) con su respuesta literal.
+- **Apéndice C**: soluciones razonadas de las 57 preguntas de repaso.
+- **Apéndice D**: glosario alfabético de 98 términos con el módulo de referencia.
 
 Incluye el material de la charla *La nube desde dentro: usuarios, proveedores y
 almacenamiento de objetos* (Marcos García Martín, MEGA S4, CIFP Avilés, 29 de octubre
