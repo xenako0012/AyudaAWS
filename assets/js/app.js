@@ -365,6 +365,8 @@
       html += '<span class="sep">/</span><a href="#/examen">Examen del curso</a>' +
         (ruta.sub ? '<span class="sep">/</span><span class="actual">' +
           (ruta.sub === 'estudio' ? 'Preguntas y respuestas' : ruta.sub === 'tarjetas' ? 'Tarjetas' : 'Test') + '</span>' : '');
+    } else if (ruta.tipo === 'charla') {
+      html += '<span class="sep">/</span><span class="actual">La nube desde dentro</span>';
     } else if (ruta.tipo === 'recursos') {
       html += '<span class="sep">/</span><span class="actual">Recursos y certificación</span>';
     }
@@ -651,7 +653,69 @@
     return arr;
   }
 
-  /* ---------- Examen del curso: 40 preguntas oficiales ---------- */
+  /* ---------- Vista: la nube desde dentro ---------- */
+  var CHARLA = window.CHARLA || { apartados: [], repasa: [] };
+
+  function vistaCharla() {
+    var indice = CHARLA.apartados.map(function (a, i) {
+      return '<button class="chip" type="button" data-ir="' + a.id + '">' + (i + 1) + '. ' + esc(a.titulo) + '</button>';
+    }).join('');
+
+    var cuerpo = CHARLA.apartados.map(function (a, i) {
+      return '<section class="bloque-seccion" id="' + a.id + '">' +
+        '<div class="titulo-seccion"><h2>' + (i + 1) + '. ' + esc(a.titulo) + '</h2></div>' +
+        a.bloques.map(renderBloque).join('') +
+        '</section>';
+    }).join('');
+
+    var repasa = CHARLA.repasa.map(function (q, i) {
+      return '<article class="qa"><p class="qa__num">Pregunta ' + (i + 1) + '</p>' +
+        '<h3 class="qa__p">' + fmt(q.p) + '</h3>' +
+        '<p class="qa__r">' + fmt(q.r) + '</p></article>';
+    }).join('');
+
+    return '<header class="cabecera-sec">' +
+      '<div class="cabecera-sec__serie">Charla · MOC 0492</div>' +
+      '<h1>' + esc(CHARLA.titulo) + '</h1>' +
+      '<p class="cabecera-sec__resumen">' + esc(CHARLA.subtitulo) + '. ' + esc(CHARLA.ponente) + '.</p>' +
+      '<p class="cabecera-sec__resumen" style="margin-top:.3rem">' + esc(CHARLA.contexto) + '</p>' +
+      '</header>' +
+      '<div class="acciones-fila" style="margin-top:1.1rem">' +
+      '<a class="btn btn--primario" href="' + CHARLA.archivo + '" target="_blank" rel="noopener">Abrir el PDF original' + ICO.flecha + '</a>' +
+      '<a class="btn btn--borde" href="#/examen/test/t5">Test de la charla</a>' +
+      '</div>' +
+      '<div class="rejilla-datos" style="margin-top:1.2rem">' +
+      '<div class="dato"><strong>Apartados</strong><span>' + CHARLA.apartados.length + ' bloques de contenido</span></div>' +
+      '<div class="dato"><strong>Repaso</strong><span>' + CHARLA.repasa.length + ' preguntas con respuesta modelo</span></div>' +
+      '<div class="dato"><strong>Test</strong><span>' + preguntasExamen('t5').length + ' preguntas de opción múltiple</span></div>' +
+      '</div>' +
+      '<section class="bloque-seccion"><div class="titulo-seccion"><h2>Índice de la charla</h2><p>Los trece apartados del PDF</p></div>' +
+      '<div class="filtro-barra">' + indice + '</div></section>' +
+      cuerpo +
+      '<section class="bloque-seccion"><div class="titulo-seccion"><h2>Preguntas de repaso</h2><p>Las diez del final del PDF, con respuesta modelo</p></div>' +
+      '<button class="btn btn--suave btn--sm" type="button" id="alternarRepasa">Ocultar respuestas</button>' +
+      '<div id="repasaCharla" style="margin-top:1rem">' + repasa + '</div></section>' +
+      '<div class="callout callout--tip"><div class="callout__cuerpo"><h4>Para qué sirve esta página</h4>' +
+      '<p>Los cuatro módulos explican AWS; esta charla cuenta cómo se ve la nube desde dentro de un proveedor. Léela antes o después del módulo 3 y comprueba lo aprendido con el test.</p></div></div>';
+  }
+
+  function montarCharla() {
+    $$('[data-ir]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var el = document.getElementById(b.getAttribute('data-ir'));
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+    var alt = $('#alternarRepasa'), caja = $('#repasaCharla');
+    if (alt && caja) {
+      alt.addEventListener('click', function () {
+        var oculto = caja.classList.toggle('estudio--oculto');
+        alt.textContent = oculto ? 'Mostrar respuestas' : 'Ocultar respuestas';
+      });
+    }
+  }
+
+  /* ---------- Examen del curso ---------- */
   var CLAVE_EXAMEN = 'acf.examen.v1';
   var tarjeta = null;
 
@@ -682,7 +746,7 @@
   function vistaExamen() {
     var pr = progresoExamen();
     var modos = [
-      ['#/examen/estudio', 'Estudio', 'Las 40 preguntas con su respuesta literal, seguidas y sin distracciones.'],
+      ['#/examen/estudio', 'Estudio', 'Las ' + PREGUNTAS_EXAMEN.length + ' preguntas con su respuesta literal, seguidas y sin distracciones.'],
       ['#/examen/tarjetas', 'Tarjetas', 'Pregunta delante, respuesta detrás. Marca lo que ya sabes y repasa solo lo demás.'],
       ['#/examen/test', 'Test', 'Opción múltiple con corrección inmediata o simulando las condiciones del examen.']
     ].map(function (m) {
@@ -711,7 +775,7 @@
       '</header>' +
 
       '<div class="rejilla-datos">' +
-      '<div class="dato"><strong>Temas</strong><span>' + EXAMEN_TEMAS.length + ' temas de 10 preguntas</span></div>' +
+      '<div class="dato"><strong>Temas</strong><span>' + EXAMEN_TEMAS.length + ' temas · ' + pr.total + ' preguntas</span></div>' +
       '<div class="dato"><strong>Preguntas</strong><span>' + pr.total + ' con respuesta oficial</span></div>' +
       '<div class="dato"><strong>Marcadas como sabidas</strong><span>' + pr.sabidas + ' de ' + pr.total + '</span></div>' +
       '<div class="dato"><strong>A repasar</strong><span>' + pr.repasar + ' pendientes</span></div>' +
@@ -720,7 +784,7 @@
       '<section class="bloque-seccion"><div class="titulo-seccion"><h2>Cómo prepararlo</h2><p>Tres formas de estudiar las mismas preguntas</p></div>' +
       '<div class="rejilla-modos">' + modos + '</div></section>' +
 
-      '<section class="bloque-seccion"><div class="titulo-seccion"><h2>Los cuatro temas</h2><p>Diez preguntas por tema</p></div>' +
+      '<section class="bloque-seccion"><div class="titulo-seccion"><h2>Los temas</h2><p>Del curso y de la charla</p></div>' +
       '<div class="rejilla-modulos">' + temas + '</div></section>' +
 
       '<div class="callout callout--aviso"><div class="callout__cuerpo"><h4>Respuestas literales</h4>' +
@@ -803,11 +867,11 @@
       '<p class="nota-pie"><a href="#/examen">Salir de las tarjetas</a> · <a href="#/examen/estudio">Ver todas las respuestas</a></p>';
   }
 
-  function vistaTest() {
+  function vistaTest(temaId) {
     if (!examen) {
       var opcionesTema = '<option value="">Todos los temas · ' + PREGUNTAS_EXAMEN.length + ' preguntas</option>' +
         EXAMEN_TEMAS.map(function (t) {
-          return '<option value="' + t.id + '">Tema ' + t.numero + ' · ' + esc(t.titulo) + ' (' + t.preguntas.length + ')</option>';
+          return '<option value="' + t.id + '"' + (temaId === t.id ? ' selected' : '') + '>Tema ' + t.numero + ' · ' + esc(t.titulo) + ' (' + t.preguntas.length + ')</option>';
         }).join('');
 
       return '<header class="examen-cab">' +
@@ -824,7 +888,7 @@
         '</div></header>' +
         '<div class="rejilla-datos" style="margin-top:1.2rem">' +
         '<div class="dato"><strong>Preguntas</strong><span>' + PREGUNTAS_EXAMEN.length + ' oficiales del curso</span></div>' +
-        '<div class="dato"><strong>Temas</strong><span>' + EXAMEN_TEMAS.length + ' · 10 preguntas cada uno</span></div>' +
+        '<div class="dato"><strong>Temas</strong><span>' + EXAMEN_TEMAS.length + ' · 10 del curso y 20 de la charla</span></div>' +
         '<div class="dato"><strong>Recomendación</strong><span>Empieza por tema y termina con el test completo</span></div>' +
         '</div>' +
         '<div class="callout callout--tip" style="margin-top:1.5rem"><div class="callout__cuerpo"><h4>Cómo leer las opciones</h4>' +
@@ -1299,6 +1363,7 @@
       }
       return { tipo: 'examen', sub: '', temaId: '' };
     }
+    if (partes[0] === 'charla') return { tipo: 'charla' };
     if (partes[0] === 'recursos') return { tipo: 'recursos' };
     return { tipo: 'inicio' };
   }
@@ -1330,8 +1395,11 @@
     } else if (ruta.tipo === 'examen') {
       if (ruta.sub === 'estudio') { html = vistaEstudio(ruta.temaId); titulo = 'Preguntas y respuestas'; }
       else if (ruta.sub === 'tarjetas') { html = vistaTarjetas(ruta.temaId); titulo = 'Tarjetas del examen'; }
-      else if (ruta.sub === 'test') { html = vistaTest(); titulo = 'Test del examen'; }
+      else if (ruta.sub === 'test') { html = vistaTest(ruta.temaId); titulo = 'Test del examen'; }
       else { html = vistaExamen(); titulo = 'Examen del curso'; }
+    } else if (ruta.tipo === 'charla') {
+      html = vistaCharla();
+      titulo = 'La nube desde dentro';
     } else if (ruta.tipo === 'recursos') {
       html = vistaRecursos();
       titulo = 'Recursos y certificación';
@@ -1347,6 +1415,7 @@
 
     if (ruta.tipo === 'seccion') montarSeccion(ruta.item);
     else if (ruta.tipo === 'glosario') montarGlosario();
+    else if (ruta.tipo === 'charla') montarCharla();
     else if (ruta.tipo === 'examen') {
       if (ruta.sub === 'estudio') montarEstudio();
       else if (ruta.sub === 'tarjetas') montarTarjetas();

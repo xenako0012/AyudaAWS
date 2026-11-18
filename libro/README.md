@@ -1,6 +1,6 @@
 # Apuntes en PDF · Módulos 1 a 4
 
-`Apuntes-AWS-Modulos-1-4.pdf` — 58 páginas A4, pensadas para leer en pantalla o
+`Apuntes-AWS-Modulos-1-4.pdf` — 70 páginas A4, pensadas para leer en pantalla o
 imprimir en casa.
 
 ## Contenido
@@ -8,7 +8,9 @@ imprimir en casa.
 - Portadilla con los cuatro módulos, su duración y número de secciones.
 - Los **4 módulos · 17 secciones** completos: objetivos, explicaciones, tablas,
   esquemas, notas de examen y tres o cuatro preguntas de autoevaluación por sección.
-- **Apéndice B**: las 40 preguntas del examen del curso (4 temas) con su respuesta literal.
+- **Apéndice A**: la charla *La nube desde dentro* en 13 apartados, con las 10 preguntas
+  de repaso y sus respuestas.
+- **Apéndice B**: las 60 preguntas del examen (5 temas) con su respuesta literal.
 - **Apéndice C**: soluciones razonadas de las 57 preguntas de repaso.
 - **Apéndice D**: glosario alfabético de 98 términos con el módulo de referencia.
 

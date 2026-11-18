@@ -72,7 +72,7 @@ TIPOGRAFIA = {
 DIR_FUENTES = '/usr/share/fonts/truetype/dejavu'
 
 ETIQUETAS_APENDICE = {
-    'Apéndice A': 'Guía del examen CLF-C02',
+    'Apéndice A': 'La nube desde dentro',
     'Apéndice B': 'Examen del curso',
     'Apéndice C': 'Soluciones',
     'Apéndice D': 'Glosario',
@@ -1195,6 +1195,7 @@ def cargar_examen():
     script = (
         "global.window={};"
         "require('./assets/js/datos/examen.js');"
+        "require('./assets/js/datos/charla.js');"
         "process.stdout.write(JSON.stringify(window.EXAMEN));"
     )
     salida = subprocess.run(['node', '-e', script], cwd=RAIZ,
@@ -1224,6 +1225,76 @@ def apendice_examen_curso(temas):
                                ParagraphStyle('exr', parent=ST['Body'], fontSize=8.6,
                                               leading=12.2, textColor=GRIS,
                                               leftIndent=12, spaceAfter=0)))
+    return e
+
+
+def cargar_charla():
+    script = (
+        "global.window={};"
+        "require('./assets/js/datos/charla.js');"
+        "process.stdout.write(JSON.stringify(window.CHARLA));"
+    )
+    salida = subprocess.run(['node', '-e', script], cwd=RAIZ,
+                            capture_output=True, text=True, check=True)
+    return json.loads(salida.stdout)
+
+
+def render_bloques(bloques):
+    e = []
+    for b in bloques:
+        tipo = b.get('t')
+        if tipo == 'p':
+            e.append(P(b.get('c', '')))
+        elif tipo in ('h', 'h3'):
+            e.append(Paragraph(en_linea(b.get('c', '')), ST['H3']))
+        elif tipo == 'ul':
+            e.extend(vinetas(b.get('c', [])))
+            e.append(Spacer(1, 4))
+        elif tipo == 'ol':
+            e.extend(numeradas(b.get('c', [])))
+            e.append(Spacer(1, 4))
+        elif tipo == 'tabla':
+            e.append(tabla(b.get('cab'), b.get('filas', [])))
+            e.append(Spacer(1, 9))
+        elif tipo == 'nota':
+            e.append(bloque_nota(b))
+        elif tipo == 'esquema':
+            e.append(bloque_esquema(b.get('c', [])))
+        elif tipo == 'def':
+            e.append(bloque_definiciones(b.get('c', [])))
+            e.append(Spacer(1, 8))
+    return e
+
+
+def apendice_charla(charla):
+    e = apendice('Apéndice A', 'A', charla['titulo'],
+                 '%s. %s Material de la charla de %s, impartida en el CIFP Avilés '
+                 'el 29 de octubre de 2026. Aquí está resumido apartado a apartado y con '
+                 'las diez preguntas de repaso al final.'
+                 % (charla['subtitulo'], '', charla['ponente']))
+
+    for i, a in enumerate(charla['apartados'], 1):
+        e.append(Paragraph('%d. %s' % (i, en_linea(a['titulo'])),
+                           ParagraphStyle('chh', parent=ST['H3'], spaceBefore=14,
+                                          fontSize=10.5, textColor=NAVY)))
+        e.extend(render_bloques(a['bloques']))
+
+    e.append(Spacer(1, 10))
+    e.append(Paragraph('Preguntas de repaso', ParagraphStyle(
+        'chr', parent=ST['H2'], fontSize=13, leading=17, spaceBefore=16,
+        spaceAfter=2, textColor=NAVY)))
+    e.append(Paragraph('Las diez del final del PDF, con una respuesta modelo.',
+                       ParagraphStyle('chrs', parent=ST['Small'], spaceAfter=6)))
+    for i, q in enumerate(charla['repasa'], 1):
+        e.append(Spacer(1, 6))
+        e.append(Paragraph('%d. %s' % (i, en_linea(q['p'])),
+                           ParagraphStyle('chp', parent=ST['Body'], fontName='SerifBold',
+                                          fontSize=8.9, leading=12.4, spaceAfter=2,
+                                          keepWithNext=1)))
+        e.append(Paragraph(en_linea(q['r']),
+                           ParagraphStyle('cha', parent=ST['Body'], fontSize=8.6,
+                                          leading=12.2, textColor=GRIS,
+                                          leftIndent=12, spaceAfter=0)))
     return e
 
 
@@ -1326,6 +1397,10 @@ def construir():
 
     for m in modulos:
         guion.extend(capitulo(m, m['numero']))
+
+    guion.append(NextPageTemplate('capitulo'))
+    guion.append(PageBreak())
+    guion.extend(apendice_charla(cargar_charla()))
 
     guion.append(NextPageTemplate('capitulo'))
     guion.append(PageBreak())

@@ -2,12 +2,14 @@
 
 Sitio web estático, sin dependencias ni proceso de compilación, con los **cuatro primeros
 módulos** de **AWS Academy Cloud Foundations** explicados en español: 4 módulos,
-17 secciones, 57 preguntas de repaso, 98 términos de glosario y las **40 preguntas del
-examen del curso** con su respuesta oficial.
+17 secciones, 57 preguntas de repaso, 98 términos de glosario y un **examen de 60
+preguntas** con su respuesta oficial (las 40 del curso más las 20 de la charla).
 
 Está ampliado con el material de la charla **«La nube desde dentro: usuarios, proveedores
 y almacenamiento de objetos»** (Marcos García Martín, MEGA S4, CIFP Avilés, 29 de octubre
-de 2026), integrada dentro de las secciones de los cuatro módulos.
+de 2026): repartido por las secciones de los cuatro módulos y, además, con un apartado
+propio en `#/charla` que resume sus 13 bloques, recoge las 10 preguntas de repaso y
+enlaza al PDF original.
 
 ## Contenido
 
@@ -38,12 +40,12 @@ notas orientadas al examen, términos clave y un cuestionario con explicaciones.
 
 ## Examen del curso
 
-Las 40 preguntas oficiales del examen (4 temas × 10 preguntas) con su respuesta literal,
-en tres modos de estudio:
+Las **60 preguntas** del examen (5 temas: los 4 del curso, 10 preguntas cada uno, más
+las 20 de la charla) con su respuesta literal, en tres modos de estudio:
 
 | Modo | Qué hace |
 | --- | --- |
-| **Estudio** | Las 40 preguntas y respuestas seguidas, con opción de ocultar las respuestas para autoevaluarse |
+| **Estudio** | Las 60 preguntas y respuestas seguidas, con opción de ocultar las respuestas para autoevaluarse |
 | **Tarjetas** | Una pregunta por pantalla, respuesta tras un botón, y marcas «la sabía» / «a repasar» (se guardan en `localStorage`) |
 | **Test** | Opción múltiple por tema o completa, con corrección inmediata o modo examen y revisión final |
 
@@ -56,7 +58,9 @@ versiones plausibles de cada respuesta, para comprobar que se distingue el matiz
 - **Buscador global** (`Ctrl` + `K` o `/`) sobre secciones, módulos y glosario.
 - **Progreso guardado** en `localStorage`: porcentaje, secciones completadas por módulo y reinicio.
 - **Cuestionarios** con corrección inmediata y explicación de cada respuesta.
-- **Examen del curso** con las 40 preguntas oficiales en modo estudio, tarjetas y test.
+- **Examen del curso** con 60 preguntas (5 temas) en modo estudio, tarjetas y test.
+- **Apartado de la charla** (`#/charla`): resumen de sus 13 bloques, las 10 preguntas de
+  repaso con respuesta y enlace al PDF original.
 - **Glosario** alfabético con filtro por texto y por módulo.
 - **Tema claro/oscuro**, diseño responsive y estilos de impresión (PDF).
 
@@ -67,7 +71,8 @@ index.html                  Estructura, navegación y contenedores
 assets/css/estilos.css      Diseño completo (temas, componentes, responsive, impresión)
 assets/js/app.js            Router por hash, render, progreso, buscador, quiz y examen
 assets/js/datos/m01..m04.js Contenido de cada módulo
-assets/js/datos/examen.js   40 preguntas oficiales del examen y sus opciones
+assets/js/datos/examen.js   Las 40 preguntas del curso y sus opciones
+assets/js/datos/charla.js   Resumen de la charla, sus 10 preguntas y el tema 5 del examen
 ```
 
 El contenido vive en `assets/js/datos/*.js` como objetos JavaScript. Cada módulo se registra con:
