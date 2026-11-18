@@ -1,7 +1,7 @@
 /* =========================================================
    AWS Academy Cloud Foundations · Aplicación
    Router por hash, renderizado de contenido, progreso,
-   buscador, glosario y simulacro de examen.
+   buscador, glosario y examen del curso.
    ========================================================= */
 (function () {
   'use strict';
@@ -42,9 +42,27 @@
     });
   });
 
+  var EXAMEN_TEMAS = window.EXAMEN || [];
+  var PREGUNTAS_EXAMEN = [];
+  EXAMEN_TEMAS.forEach(function (t) {
+    t.preguntas.forEach(function (q, i) {
+      PREGUNTAS_EXAMEN.push({ q: q, tema: t, indice: i, seccion: INDICE_SEC[t.seccion] });
+    });
+  });
+
+  var TERMINOS_UNICOS = (function () {
+    var vistos = {}, n = 0;
+    TERMINOS.forEach(function (x) {
+      var k = normaliza(x.t.t);
+      if (!vistos[k]) { vistos[k] = true; n++; }
+    });
+    return n;
+  })();
+
   /* ---------- Estado ---------- */
   var estado = {
     progreso: cargarProgreso(),
+    marcas: cargarMarcas(),
     abiertos: {},
     tema: 'claro'
   };
@@ -344,7 +362,11 @@
     } else if (ruta.tipo === 'glosario') {
       html += '<span class="sep">/</span><span class="actual">Glosario</span>';
     } else if (ruta.tipo === 'examen') {
-      html += '<span class="sep">/</span><span class="actual">Simulacro de examen</span>';
+      html += '<span class="sep">/</span><a href="#/examen">Examen del curso</a>' +
+        (ruta.sub ? '<span class="sep">/</span><span class="actual">' +
+          (ruta.sub === 'estudio' ? 'Preguntas y respuestas' : ruta.sub === 'tarjetas' ? 'Tarjetas' : 'Test') + '</span>' : '');
+    } else if (ruta.tipo === 'charla') {
+      html += '<span class="sep">/</span><span class="actual">La nube desde dentro</span>';
     } else if (ruta.tipo === 'recursos') {
       html += '<span class="sep">/</span><span class="actual">Recursos y certificación</span>';
     }
@@ -360,16 +382,16 @@
     var hero = '<section class="hero">' +
       '<span class="hero__etiqueta">AWS Academy · Cloud Foundations</span>' +
       '<h1>Domina los fundamentos de la nube de <em>AWS</em></h1>' +
-      '<p class="hero__sub">Los 10 módulos del curso, explicados en español y con vocación práctica: conceptos de nube, precios, infraestructura global, seguridad, redes, cómputo, almacenamiento, bases de datos, arquitectura y escalado. Con cuestionarios y simulacro de examen incluidos.</p>' +
+      '<p class="hero__sub">Los cuatro primeros módulos del curso, explicados en español y con vocación práctica: conceptos de nube, precios y economía, infraestructura global y seguridad. Incluye el material de la charla «La nube desde dentro» sobre proveedores, almacenamiento de objetos y rendimiento.</p>' +
       '<div class="hero__acciones">' +
       '<a class="btn btn--primario" href="#/seccion/' + primeroPendiente.seccion.id + '">' + (empezado ? 'Continuar el curso' : 'Empezar por el módulo 1') + ICO.flecha + '</a>' +
-      '<a class="btn btn--fantasma" href="#/examen">Simulacro de examen</a>' +
+      '<a class="btn btn--fantasma" href="#/examen">Examen del curso</a>' +
       '</div>' +
       '<dl class="hero__datos">' +
       '<div><dt>' + MODULOS.length + '</dt><dd>Módulos</dd></div>' +
       '<div><dt>' + TOTAL_SECCIONES + '</dt><dd>Secciones</dd></div>' +
       '<div><dt>' + cifras(nPreguntas) + '</dt><dd>Preguntas</dd></div>' +
-      '<div><dt>' + TERMINOS.length + '</dt><dd>Términos clave</dd></div>' +
+      '<div><dt>' + TERMINOS_UNICOS + '</dt><dd>Términos clave</dd></div>' +
       '</dl></section>';
 
     var continuar = empezado ? '<section class="bloque-seccion" style="margin-top:1.6rem">' +
@@ -394,7 +416,7 @@
     var ruta = [
       { t: 'Estudia la sección', d: 'Cada sección tiene una explicación breve, tablas, esquemas y los términos que hay que retener.' },
       { t: 'Comprueba lo aprendido', d: 'Responde el cuestionario con explicación inmediata y marca la sección como completada.' },
-      { t: 'Ponte a prueba', d: 'Cuando termines un módulo, usa el simulacro para medir tu nivel y repasar los fallos.' }
+      { t: 'Ponte a prueba', d: 'Cuando termines un módulo, usa el test del examen para medir tu nivel y repasar los fallos.' }
     ].map(function (p) {
       return '<div class="paso"><h4>' + p.t + '</h4><p>' + p.d + '</p></div>';
     }).join('');
@@ -410,7 +432,7 @@
 
     return hero + continuar +
       '<section class="bloque-seccion">' +
-      '<div class="titulo-seccion"><h2>Los 10 módulos</h2><p>De los conceptos básicos a la arquitectura elástica</p></div>' +
+      '<div class="titulo-seccion"><h2>Los cuatro módulos</h2><p>De los conceptos básicos a la seguridad</p></div>' +
       '<div class="rejilla-modulos">' + moduloCards + '</div>' +
       '</section>' +
 
@@ -475,7 +497,7 @@
         : '<a class="nav-sec__enlace" href="#/modulo/' + m.id + '"><small>← Volver</small><strong>Módulo ' + m.numero + ': ' + esc(m.titulo) + '</strong></a>') +
       (siguiente
         ? '<a class="nav-sec__enlace nav-sec__enlace--siguiente" href="#/seccion/' + siguiente.seccion.id + '"><small>Siguiente →</small><strong>' + esc(siguiente.seccion.titulo) + '</strong></a>'
-        : '<a class="nav-sec__enlace nav-sec__enlace--siguiente" href="#/examen"><small>Siguiente →</small><strong>Simulacro de examen</strong></a>') +
+        : '<a class="nav-sec__enlace nav-sec__enlace--siguiente" href="#/examen"><small>Siguiente →</small><strong>Examen del curso</strong></a>') +
       '</nav>';
 
     return '<header class="cabecera-sec">' +
@@ -631,19 +653,233 @@
     return arr;
   }
 
+  /* ---------- Vista: la nube desde dentro ---------- */
+  var CHARLA = window.CHARLA || { apartados: [], repasa: [] };
+
+  function vistaCharla() {
+    var indice = CHARLA.apartados.map(function (a, i) {
+      return '<button class="chip" type="button" data-ir="' + a.id + '">' + (i + 1) + '. ' + esc(a.titulo) + '</button>';
+    }).join('');
+
+    var cuerpo = CHARLA.apartados.map(function (a, i) {
+      return '<section class="bloque-seccion" id="' + a.id + '">' +
+        '<div class="titulo-seccion"><h2>' + (i + 1) + '. ' + esc(a.titulo) + '</h2></div>' +
+        a.bloques.map(renderBloque).join('') +
+        '</section>';
+    }).join('');
+
+    var repasa = CHARLA.repasa.map(function (q, i) {
+      return '<article class="qa"><p class="qa__num">Pregunta ' + (i + 1) + '</p>' +
+        '<h3 class="qa__p">' + fmt(q.p) + '</h3>' +
+        '<p class="qa__r">' + fmt(q.r) + '</p></article>';
+    }).join('');
+
+    return '<header class="cabecera-sec">' +
+      '<div class="cabecera-sec__serie">Charla · MOC 0492</div>' +
+      '<h1>' + esc(CHARLA.titulo) + '</h1>' +
+      '<p class="cabecera-sec__resumen">' + esc(CHARLA.subtitulo) + '. ' + esc(CHARLA.ponente) + '.</p>' +
+      '<p class="cabecera-sec__resumen" style="margin-top:.3rem">' + esc(CHARLA.contexto) + '</p>' +
+      '</header>' +
+      '<div class="acciones-fila" style="margin-top:1.1rem">' +
+      '<a class="btn btn--primario" href="' + CHARLA.archivo + '" target="_blank" rel="noopener">Abrir el PDF original' + ICO.flecha + '</a>' +
+      '<a class="btn btn--borde" href="#/examen/test/t5">Test de la charla</a>' +
+      '</div>' +
+      '<div class="rejilla-datos" style="margin-top:1.2rem">' +
+      '<div class="dato"><strong>Apartados</strong><span>' + CHARLA.apartados.length + ' bloques de contenido</span></div>' +
+      '<div class="dato"><strong>Repaso</strong><span>' + CHARLA.repasa.length + ' preguntas con respuesta modelo</span></div>' +
+      '<div class="dato"><strong>Test</strong><span>' + preguntasExamen('t5').length + ' preguntas de opción múltiple</span></div>' +
+      '</div>' +
+      '<section class="bloque-seccion"><div class="titulo-seccion"><h2>Índice de la charla</h2><p>Los trece apartados del PDF</p></div>' +
+      '<div class="filtro-barra">' + indice + '</div></section>' +
+      cuerpo +
+      '<section class="bloque-seccion"><div class="titulo-seccion"><h2>Preguntas de repaso</h2><p>Las diez del final del PDF, con respuesta modelo</p></div>' +
+      '<button class="btn btn--suave btn--sm" type="button" id="alternarRepasa">Ocultar respuestas</button>' +
+      '<div id="repasaCharla" style="margin-top:1rem">' + repasa + '</div></section>' +
+      '<div class="callout callout--tip"><div class="callout__cuerpo"><h4>Para qué sirve esta página</h4>' +
+      '<p>Los cuatro módulos explican AWS; esta charla cuenta cómo se ve la nube desde dentro de un proveedor. Léela antes o después del módulo 3 y comprueba lo aprendido con el test.</p></div></div>';
+  }
+
+  function montarCharla() {
+    $$('[data-ir]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var el = document.getElementById(b.getAttribute('data-ir'));
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+    var alt = $('#alternarRepasa'), caja = $('#repasaCharla');
+    if (alt && caja) {
+      alt.addEventListener('click', function () {
+        var oculto = caja.classList.toggle('estudio--oculto');
+        alt.textContent = oculto ? 'Mostrar respuestas' : 'Ocultar respuestas';
+      });
+    }
+  }
+
+  /* ---------- Examen del curso ---------- */
+  var CLAVE_EXAMEN = 'acf.examen.v1';
+  var tarjeta = null;
+
+  function cargarMarcas() {
+    try {
+      var raw = localStorage.getItem(CLAVE_EXAMEN);
+      var obj = raw ? JSON.parse(raw) : {};
+      return (obj && typeof obj === 'object') ? obj : {};
+    } catch (e) { return {}; }
+  }
+  function guardarMarcas() {
+    try { localStorage.setItem(CLAVE_EXAMEN, JSON.stringify(estado.marcas)); } catch (e) { /* sin almacenamiento */ }
+  }
+  function clavePregunta(p) { return p.tema.id + '-' + (p.indice + 1); }
+  function preguntasExamen(temaId) {
+    return PREGUNTAS_EXAMEN.filter(function (p) { return !temaId || p.tema.id === temaId; });
+  }
+  function progresoExamen() {
+    var sabidas = 0, repasar = 0;
+    PREGUNTAS_EXAMEN.forEach(function (p) {
+      var m = estado.marcas[clavePregunta(p)];
+      if (m === 'sabida') sabidas++;
+      else if (m === 'repasar') repasar++;
+    });
+    return { sabidas: sabidas, repasar: repasar, total: PREGUNTAS_EXAMEN.length };
+  }
+
   function vistaExamen() {
+    var pr = progresoExamen();
+    var modos = [
+      ['#/examen/estudio', 'Estudio', 'Las ' + PREGUNTAS_EXAMEN.length + ' preguntas con su respuesta literal, seguidas y sin distracciones.'],
+      ['#/examen/tarjetas', 'Tarjetas', 'Pregunta delante, respuesta detrás. Marca lo que ya sabes y repasa solo lo demás.'],
+      ['#/examen/test', 'Test', 'Opción múltiple con corrección inmediata o simulando las condiciones del examen.']
+    ].map(function (m) {
+      return '<a class="modo-card" href="' + m[0] + '"><strong>' + m[1] + '</strong><span>' + m[2] + '</span><span class="modo-card__flecha" aria-hidden="true">→</span></a>';
+    }).join('');
+
+    var temas = EXAMEN_TEMAS.map(function (t) {
+      var hechas = t.preguntas.filter(function (q, i) {
+        return estado.marcas[t.id + '-' + (i + 1)] === 'sabida';
+      }).length;
+      var pct = Math.round((hechas / t.preguntas.length) * 100);
+      return '<a class="tarjeta-mod" href="#/examen/estudio/' + t.id + '">' +
+        '<div class="tarjeta-mod__cab"><span class="tarjeta-mod__num">' + t.numero + '</span>' +
+        (pct === 100 ? '<span class="tarjeta-mod__estado">Sabido</span>' : '') + '</div>' +
+        '<h3>' + esc(t.titulo) + '</h3>' +
+        '<p>' + t.preguntas.length + ' preguntas oficiales.</p>' +
+        '<div class="tarjeta-mod__pie"><span>' + hechas + ' de ' + t.preguntas.length + ' marcadas</span>' +
+        '<span class="tarjeta-mod__mini-barra"><span style="width:' + pct + '%"></span></span></div>' +
+        '</a>';
+    }).join('');
+
+    return '<header class="cabecera-sec">' +
+      '<div class="cabecera-sec__serie">Módulos 1 a 4</div>' +
+      '<h1>Examen del curso</h1>' +
+      '<p class="cabecera-sec__resumen">Las ' + pr.total + ' preguntas del examen, con la respuesta oficial. Léelas, recuérdalas con tarjetas y compruébalas con el test.</p>' +
+      '</header>' +
+
+      '<div class="rejilla-datos">' +
+      '<div class="dato"><strong>Temas</strong><span>' + EXAMEN_TEMAS.length + ' temas · ' + pr.total + ' preguntas</span></div>' +
+      '<div class="dato"><strong>Preguntas</strong><span>' + pr.total + ' con respuesta oficial</span></div>' +
+      '<div class="dato"><strong>Marcadas como sabidas</strong><span>' + pr.sabidas + ' de ' + pr.total + '</span></div>' +
+      '<div class="dato"><strong>A repasar</strong><span>' + pr.repasar + ' pendientes</span></div>' +
+      '</div>' +
+
+      '<section class="bloque-seccion"><div class="titulo-seccion"><h2>Cómo prepararlo</h2><p>Tres formas de estudiar las mismas preguntas</p></div>' +
+      '<div class="rejilla-modos">' + modos + '</div></section>' +
+
+      '<section class="bloque-seccion"><div class="titulo-seccion"><h2>Los temas</h2><p>Del curso y de la charla</p></div>' +
+      '<div class="rejilla-modulos">' + temas + '</div></section>' +
+
+      '<div class="callout callout--aviso"><div class="callout__cuerpo"><h4>Respuestas literales</h4>' +
+      '<p>Las respuestas son las del examen del curso, sin reescribir. En el test, las opciones incorrectas son versiones plausibles de cada respuesta: sirven para comprobar que distingues el matiz, no para memorizar la letra.</p></div></div>';
+  }
+
+  function vistaEstudio(temaId) {
+    var chips = '<button class="chip" data-tema-filtro="" aria-pressed="' + (!temaId) + '">Todos</button>' +
+      EXAMEN_TEMAS.map(function (t) {
+        return '<button class="chip" data-tema-filtro="' + t.id + '" aria-pressed="' + (temaId === t.id) + '">Tema ' + t.numero + '</button>';
+      }).join('');
+
+    var bloques = EXAMEN_TEMAS.filter(function (t) { return !temaId || t.id === temaId; }).map(function (t) {
+      var items = t.preguntas.map(function (q, i) {
+        return '<article class="qa">' +
+          '<p class="qa__num">Pregunta ' + (i + 1) + '</p>' +
+          '<h3 class="qa__p">' + fmt(q.p) + '</h3>' +
+          '<p class="qa__r">' + fmt(q.r) + '</p>' +
+          '</article>';
+      }).join('');
+      return '<section class="bloque-seccion">' +
+        '<div class="titulo-seccion"><h2>Tema ' + t.numero + ' · ' + esc(t.titulo) + '</h2><p>' + t.preguntas.length + ' preguntas</p></div>' +
+        items + '</section>';
+    }).join('');
+
+    return '<header class="cabecera-sec">' +
+      '<div class="cabecera-sec__serie">Estudio</div>' +
+      '<h1>Preguntas y respuestas</h1>' +
+      '<p class="cabecera-sec__resumen">Las respuestas oficiales, tal cual se preguntan en el examen. Puedes ocultarlas para autoevaluarte mientras lees.</p>' +
+      '</header>' +
+      '<div class="filtro-barra">' + chips +
+      '<button class="btn btn--suave btn--sm" type="button" id="alternarRespuestas">Ocultar respuestas</button></div>' +
+      '<div id="listaEstudio">' + bloques + '</div>' +
+      '<p class="nota-pie"><a href="#/examen">Volver al examen</a></p>';
+  }
+
+  function vistaTarjetas(temaId) {
+    if (!tarjeta || tarjeta.temaId !== (temaId || '')) {
+      tarjeta = { lista: preguntasExamen(temaId), i: 0, mostrada: false, temaId: temaId || '' };
+    }
+    if (!tarjeta.lista.length) {
+      tarjeta = { lista: preguntasExamen(temaId), i: 0, mostrada: false, temaId: temaId || '' };
+    }
+
+    if (tarjeta.i >= tarjeta.lista.length) {
+      var pr = progresoExamen();
+      return '<header class="cabecera-sec"><div class="cabecera-sec__serie">Tarjetas</div>' +
+        '<h1>Ronda terminada</h1>' +
+        '<p class="cabecera-sec__resumen">Has repasado ' + tarjeta.lista.length + ' preguntas. Marcadas como sabidas: ' + pr.sabidas + ' de ' + pr.total + '.</p></header>' +
+        '<div class="rejilla-datos">' +
+        '<div class="dato"><strong>Sabidas</strong><span>' + pr.sabidas + '</span></div>' +
+        '<div class="dato"><strong>A repasar</strong><span>' + pr.repasar + '</span></div>' +
+        '</div>' +
+        '<div class="acciones-fila">' +
+        (pr.repasar ? '<button class="btn btn--primario" type="button" id="repetirPendientes">Repasar las ' + pr.repasar + ' pendientes</button>' : '') +
+        '<button class="btn btn--borde" type="button" id="reiniciarTarjetas">Empezar de nuevo</button>' +
+        '<a class="btn btn--fantasma" href="#/examen">Volver al examen</a>' +
+        '</div>';
+    }
+
+    var p = tarjeta.lista[tarjeta.i];
+    var total = tarjeta.lista.length;
+    var pct = Math.round((tarjeta.i / total) * 100);
+    var marca = estado.marcas[clavePregunta(p)];
+
+    return '<div class="examen-progreso"><span>Tema ' + p.tema.numero + '</span>' +
+      '<span class="barra"><span style="width:' + pct + '%"></span></span>' +
+      '<span>' + (tarjeta.i + 1) + ' / ' + total + '</span></div>' +
+      '<div class="tarjeta-examen">' +
+      '<p class="tarjeta-examen__meta">' + esc(p.tema.titulo) + (marca ? ' · marcada como ' + (marca === 'sabida' ? 'sabida' : 'a repasar') : '') + '</p>' +
+      '<h2 class="tarjeta-examen__p">' + fmt(p.q.p) + '</h2>' +
+      (tarjeta.mostrada
+        ? '<div class="tarjeta-examen__r"><span class="tarjeta-examen__et">Respuesta</span><p>' + fmt(p.q.r) + '</p></div>'
+        : '<button class="btn btn--primario" type="button" id="verRespuesta">Ver la respuesta</button>') +
+      (tarjeta.mostrada
+        ? '<div class="acciones-fila"><button class="btn btn--primario" type="button" data-marca="sabida">La sabía</button>' +
+          '<button class="btn btn--borde" type="button" data-marca="repasar">A repasar</button></div>'
+        : '') +
+      '</div>' +
+      '<p class="nota-pie"><a href="#/examen">Salir de las tarjetas</a> · <a href="#/examen/estudio">Ver todas las respuestas</a></p>';
+  }
+
+  function vistaTest(temaId) {
     if (!examen) {
+      var opcionesTema = '<option value="">Todos los temas · ' + PREGUNTAS_EXAMEN.length + ' preguntas</option>' +
+        EXAMEN_TEMAS.map(function (t) {
+          return '<option value="' + t.id + '"' + (temaId === t.id ? ' selected' : '') + '>Tema ' + t.numero + ' · ' + esc(t.titulo) + ' (' + t.preguntas.length + ')</option>';
+        }).join('');
+
       return '<header class="examen-cab">' +
-        '<h1>Simulacro de examen</h1>' +
-        '<p>Preguntas de todos los módulos, al estilo del examen CLF-C02. Puedes practicar con explicación inmediata o simular las condiciones reales y revisar el resultado al final.</p>' +
+        '<div class="cabecera-sec__serie">Test</div>' +
+        '<h1>Test del examen</h1>' +
+        '<p>Las mismas preguntas del examen en formato de opción múltiple. En modo práctica ves la corrección al responder; en modo examen, al final.</p>' +
         '<div class="examen-config">' +
-        '<select id="exNum" aria-label="Número de preguntas">' +
-        [10, 20, 30, 40].map(function (n) { return '<option value="' + n + '"' + (n === 20 ? ' selected' : '') + '>' + n + ' preguntas</option>'; }).join('') +
-        '</select>' +
-        '<select id="exMod" aria-label="Módulo">' +
-        '<option value="">Todos los módulos</option>' +
-        MODULOS.map(function (m) { return '<option value="' + m.numero + '">Módulo ' + m.numero + ' · ' + esc(m.titulo) + '</option>'; }).join('') +
-        '</select>' +
+        '<select id="exTema" aria-label="Tema">' + opcionesTema + '</select>' +
         '<select id="exModo" aria-label="Modo">' +
         '<option value="practica">Práctica: corrección inmediata</option>' +
         '<option value="examen">Examen: resultado al final</option>' +
@@ -651,12 +887,12 @@
         '<button class="btn btn--primario" type="button" id="empezarExamen">Comenzar</button>' +
         '</div></header>' +
         '<div class="rejilla-datos" style="margin-top:1.2rem">' +
-        '<div class="dato"><strong>Banco de preguntas</strong><span>' + PREGUNTAS.length + ' preguntas con explicación</span></div>' +
-        '<div class="dato"><strong>Recomendación</strong><span>Empieza con 20 y sube cuando aciertes más del 85 %</span></div>' +
-        '<div class="dato"><strong>Nota de corte</strong><span>700 / 1000 en el examen real</span></div>' +
+        '<div class="dato"><strong>Preguntas</strong><span>' + PREGUNTAS_EXAMEN.length + ' oficiales del curso</span></div>' +
+        '<div class="dato"><strong>Temas</strong><span>' + EXAMEN_TEMAS.length + ' · 10 del curso y 20 de la charla</span></div>' +
+        '<div class="dato"><strong>Recomendación</strong><span>Empieza por tema y termina con el test completo</span></div>' +
         '</div>' +
-        '<div class="callout callout--tip" style="margin-top:1.5rem"><div class="callout__cuerpo"><h4>Cómo leer las preguntas</h4>' +
-        '<p>Busca la palabra clave: «gestionado», «más barato», «menor latencia», «sin administrar servidores» o «cumplimiento». Casi siempre una sola opción encaja con ese criterio.</p></div></div>';
+        '<div class="callout callout--tip" style="margin-top:1.5rem"><div class="callout__cuerpo"><h4>Cómo leer las opciones</h4>' +
+        '<p>Las respuestas del examen son literales. Si dos opciones suenan parecidas, busca la que respeta el matiz: qué gestiona el cliente y qué el proveedor, cuántas perspectivas tiene el CAF o cuál es el nivel de control de cada modelo.</p></div></div>';
     }
 
     if (examen.fin) return vistaResultadoExamen();
@@ -664,13 +900,12 @@
     var q = examen.preguntas[examen.i];
     var total = examen.preguntas.length;
     var pct = Math.round((examen.i / total) * 100);
-    var yaRespondida = examen.modo === 'practica' && examen.respuestas[examen.i] != null;
 
     return '<div class="examen-progreso"><span>Pregunta ' + (examen.i + 1) + ' de ' + total + '</span>' +
       '<span class="barra"><span style="width:' + pct + '%"></span></span>' +
       '<span>' + (examen.modo === 'practica' ? 'Práctica' : 'Examen') + '</span></div>' +
       '<div class="examen-pregunta">' +
-      '<div class="examen-pregunta__meta"><span>Módulo ' + q.modulo.numero + ' · ' + esc(q.seccion.titulo) + '</span><span data-marcador-examen>0 aciertos</span></div>' +
+      '<div class="examen-pregunta__meta"><span>Tema ' + q.tema.numero + ' · ' + esc(q.tema.titulo) + '</span><span data-marcador-examen>0 aciertos</span></div>' +
       '<h2>' + fmt(q.q.p) + '</h2>' +
       '<div class="opciones" id="opcionesExamen">' +
       q.q.op.map(function (o, i) {
@@ -691,10 +926,10 @@
     var aciertos = examen.preguntas.filter(function (p, i) { return examen.respuestas[i] === p.q.ok; }).length;
     var nota = Math.round((aciertos / total) * 100);
     var mensaje, color;
-    if (nota >= 85) { mensaje = 'Excelente. Estás en condiciones de presentarte al examen real.'; color = 'var(--verde)'; }
-    else if (nota >= 70) { mensaje = 'Buen nivel. Repasa las secciones de las preguntas falladas y repite el simulacro.'; color = 'var(--acento)'; }
-    else if (nota >= 50) { mensaje = 'Vas por buen camino, pero conviene repasar los módulos con más fallos.'; color = 'var(--acento)'; }
-    else { mensaje = 'Todavía no. Vuelve al temario, estudia las secciones y prueba otra vez en unos días.'; color = 'var(--rojo)'; }
+    if (nota >= 85) { mensaje = 'Excelente. Estas preguntas ya las tienes: repásalas el día antes y listo.'; color = 'var(--verde)'; }
+    else if (nota >= 70) { mensaje = 'Buen nivel. Repasa las respuestas falladas y repite el tema correspondiente.'; color = 'var(--acento)'; }
+    else if (nota >= 50) { mensaje = 'Vas por buen camino, pero conviene volver a las tarjetas de los temas con más fallos.'; color = 'var(--acento)'; }
+    else { mensaje = 'Todavía no. Empieza por el modo estudio, sigue con las tarjetas y vuelve a intentarlo.'; color = 'var(--rojo)'; }
 
     var revision = examen.preguntas.map(function (p, i) {
       var elegida = examen.respuestas[i];
@@ -706,7 +941,7 @@
           return '<div class="opcion' + clase + '"><span class="opcion__letra">' + 'ABCD'[oi] + '</span><span>' + fmt(o) + '</span></div>';
         }).join('') + '</div>' +
         (elegida == null ? '<p class="explicacion" style="color:var(--rojo)">Sin responder.</p>' : '') +
-        '<div class="explicacion"><strong>Explicación. </strong>' + fmt(p.q.e) + '</div>' +
+        '<div class="explicacion"><strong>Respuesta oficial. </strong>' + fmt(p.q.r) + '</div>' +
         '<p style="margin:.5rem 0 0;font-size:.76rem;color:var(--texto-tenue)"><a href="#/seccion/' + p.seccion.id + '">Repasar: ' + esc(p.seccion.titulo) + '</a></p>' +
         '</div>';
     }).join('');
@@ -715,10 +950,10 @@
       '<div class="examen-resultado__nota" style="color:' + color + '">' + nota + '<small> / 100</small></div>' +
       '<h2>' + aciertos + ' de ' + total + ' respuestas correctas</h2>' +
       '<p>' + mensaje + '</p>' +
-      '<button class="btn btn--primario" type="button" id="repetirExamen">Hacer otro simulacro</button>' +
-      '<a class="btn btn--borde" href="#/">Volver al inicio</a>' +
+      '<button class="btn btn--primario" type="button" id="repetirExamen">Repetir el test</button>' +
+      '<a class="btn btn--borde" href="#/examen">Volver al examen</a>' +
       '</div>' +
-      '<section class="bloque-seccion"><div class="titulo-seccion"><h2>Revisión de las preguntas</h2><p>Con la respuesta correcta y su explicación</p></div>' +
+      '<section class="bloque-seccion"><div class="titulo-seccion"><h2>Revisión de las preguntas</h2><p>Con la respuesta oficial</p></div>' +
       revision + '</section>';
   }
 
@@ -727,12 +962,11 @@
       var btn = $('#empezarExamen');
       if (!btn) return;
       btn.addEventListener('click', function () {
-        var n = Number($('#exNum').value);
-        var mod = $('#exMod').value;
+        var temaId = $('#exTema').value;
         var modo = $('#exModo').value;
-        var pool = PREGUNTAS.filter(function (p) { return !mod || String(p.modulo.numero) === mod; });
+        var pool = preguntasExamen(temaId);
         examen = {
-          preguntas: barajar(pool).slice(0, Math.min(n, pool.length)),
+          preguntas: barajar(pool),
           i: 0,
           respuestas: [],
           modo: modo,
@@ -757,7 +991,6 @@
       var seleccion = examen.seleccion;
       var enviada = elegida != null;
       var correcta = q.q.ok;
-      var mostrar = examen.modo === 'practica' || elegida != null;
       $$('#opcionesExamen .opcion').forEach(function (o, i) {
         o.classList.remove('opcion--correcta', 'opcion--incorrecta');
         o.style.borderColor = '';
@@ -771,7 +1004,7 @@
       });
       if (examen.modo === 'practica' && elegida != null) {
         var fb = $('#feedbackExamen');
-        if (fb) fb.innerHTML = '<div class="explicacion"><strong>' + (elegida === correcta ? 'Correcto. ' : 'La respuesta correcta es ' + 'ABCD'[correcta] + '. ') + '</strong>' + fmt(q.q.e) + '</div>';
+        if (fb) fb.innerHTML = '<div class="explicacion"><strong>' + (elegida === correcta ? 'Correcto. ' : 'La respuesta correcta es ' + 'ABCD'[correcta] + '. ') + '</strong>' + fmt(q.q.r) + '</div>';
       }
       if (botonSig) botonSig.disabled = examen.modo === 'practica' ? !enviada : seleccion == null;
       var marcador = $('[data-marcador-examen]');
@@ -817,20 +1050,67 @@
 
     var abortar = $('#abortarExamen');
     if (abortar) abortar.addEventListener('click', function () {
-      if (window.confirm('¿Seguro que quieres abandonar este simulacro?')) { examen = null; render(); }
+      if (window.confirm('¿Seguro que quieres abandonar el test?')) { examen = null; render(); }
     });
 
     pintar();
   }
 
+  function montarEstudio() {
+    var alternar = $('#alternarRespuestas');
+    var lista = $('#listaEstudio');
+    if (alternar && lista) {
+      alternar.addEventListener('click', function () {
+        var oculto = lista.classList.toggle('estudio--oculto');
+        alternar.textContent = oculto ? 'Mostrar respuestas' : 'Ocultar respuestas';
+        lista.setAttribute('aria-hidden', oculto ? 'true' : 'false');
+      });
+    }
+    $$('[data-tema-filtro]').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var id = chip.getAttribute('data-tema-filtro');
+        location.hash = '#/examen/estudio' + (id ? '/' + id : '');
+      });
+    });
+  }
+
+  function montarTarjetas() {
+    var ver = $('#verRespuesta');
+    if (ver) ver.addEventListener('click', function () { tarjeta.mostrada = true; render(); });
+    $$('[data-marca]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var p = tarjeta.lista[tarjeta.i];
+        estado.marcas[clavePregunta(p)] = b.getAttribute('data-marca');
+        guardarMarcas();
+        tarjeta.i++;
+        tarjeta.mostrada = false;
+        render();
+      });
+    });
+    var pendientes = $('#repetirPendientes');
+    if (pendientes) pendientes.addEventListener('click', function () {
+      tarjeta = {
+        lista: PREGUNTAS_EXAMEN.filter(function (p) { return estado.marcas[clavePregunta(p)] === 'repasar'; }),
+        i: 0, mostrada: false, temaId: tarjeta ? tarjeta.temaId : ''
+      };
+      if (!tarjeta.lista.length) tarjeta = null;
+      render();
+    });
+    var reiniciar = $('#reiniciarTarjetas');
+    if (reiniciar) reiniciar.addEventListener('click', function () {
+      tarjeta = null;
+      location.hash = '#/examen/tarjetas';
+      render();
+    });
+  }
+
   /* ---------- Vista: recursos ---------- */
   function vistaRecursos() {
     var plan = [
-      ['Semana 1', 'Módulos 1 a 3', 'Conceptos de nube, economía y facturación, infraestructura global'],
-      ['Semana 2', 'Módulos 4 y 5', 'Seguridad, IAM, VPC, Route 53 y CloudFront'],
-      ['Semana 3', 'Módulos 6 a 8', 'Cómputo, almacenamiento y bases de datos'],
-      ['Semana 4', 'Módulos 9 y 10', 'Well-Architected, Trusted Advisor, ELB, CloudWatch y Auto Scaling'],
-      ['Repaso', 'Simulacros', 'Dos simulacros completos y repaso de las secciones falladas']
+      ['Semana 1', 'Módulos 1 y 2', 'Conceptos de nube, ventajas, AWS, migración, precios, TCO, Organizations y soporte'],
+      ['Semana 2', 'Módulo 3', 'Regiones y zonas de disponibilidad, incidentes reales, catálogo de servicios y almacenamiento de objetos'],
+      ['Semana 3', 'Módulo 4', 'Responsabilidad compartida, IAM, protección de cuentas y de datos, conformidad'],
+      ['Semana 4', 'Repaso y test', 'Cuestionarios fallados, tarjetas del examen y dos tests completos']
     ].map(function (f) {
       return '<tr><td><strong>' + f[0] + '</strong></td><td>' + f[1] + '</td><td>' + f[2] + '</td></tr>';
     }).join('');
@@ -859,7 +1139,7 @@
       '<div class="bloque-seccion"><div class="titulo-seccion"><h2>Plan de estudio en cuatro semanas</h2><p>Una hora al día es suficiente</p></div>' +
       '<div class="tabla-envoltura"><table><thead><tr><th>Momento</th><th>Contenido</th><th>Temas</th></tr></thead><tbody>' + plan + '</tbody></table></div>' +
       '<div class="callout callout--tip"><div class="callout__cuerpo"><h4>Rutina que funciona</h4>' +
-      '<p>Lee una sección, responde su cuestionario y explica en voz alta lo aprendido en dos frases. Si no puedes explicarlo, vuelve a leerlo. Al final de la semana, haz un simulacro de 20 preguntas.</p></div></div></div>' +
+      '<p>Lee una sección, responde su cuestionario y explica en voz alta lo aprendido en dos frases. Si no puedes explicarlo, vuelve a leerlo. Al final de la semana, haz el test del examen del curso.</p></div></div></div>' +
 
       '<div class="bloque-seccion"><div class="titulo-seccion"><h2>Enlaces oficiales</h2><p>Fuentes para ampliar</p></div>' +
       '<div class="lista-secciones">' +
@@ -875,7 +1155,15 @@
       '</div>' +
 
       '<div class="bloque-seccion"><div class="titulo-seccion"><h2>Sobre este sitio</h2><p>Material didáctico independiente</p></div>' +
-      '<p style="color:var(--texto-suave);max-width:75ch">Contenido elaborado en español a partir de la documentación pública de AWS y del temario de AWS Academy Cloud Foundations. No es un curso oficial de Amazon Web Services ni reproduce material propietario del curso. Las cifras de precios, límites y número de regiones cambian con el tiempo: confirma siempre los datos en la documentación oficial antes de tomar decisiones de producción.</p></div>';
+      '<p style="color:var(--texto-suave);max-width:75ch">Contenido elaborado en español a partir de la documentación pública de AWS y del temario de AWS Academy Cloud Foundations. No es un curso oficial de Amazon Web Services ni reproduce material propietario del curso. Las cifras de precios, límites y número de regiones cambian con el tiempo: confirma siempre los datos en la documentación oficial antes de tomar decisiones de producción.</p></div>' +
+
+      '<div class="bloque-seccion"><div class="titulo-seccion"><h2>Fuentes</h2><p>De dónde sale este material</p></div>' +
+      '<ul style="color:var(--texto-suave);max-width:75ch;line-height:1.75">' +
+      '<li><strong>Documentación oficial de AWS</strong>: definiciones, límites y precios de cada servicio.</li>' +
+      '<li><strong>Temario de AWS Academy Cloud Foundations</strong>, módulos 1 a 4: conceptos de nube, facturación y economía, infraestructura global y seguridad.</li>' +
+      '<li><strong>Charla «La nube desde dentro: usuarios, proveedores y almacenamiento de objetos»</strong>, de Marcos García Martín (Software Engineer en MEGA S4), impartida en el CIFP Avilés el 29 de octubre de 2026 dentro del módulo Despliegue en la nube (MOC) 0492. De ella proceden los apartados sobre roles profesionales, incidentes reales, coste del egress, elección de proveedor, almacenamiento de objetos, percentiles, HLS y CDN.</li>' +
+      '<li><strong>Reglamento (UE) 2023/2854 (Data Act)</strong>: obligaciones de cambio de proveedor, plazos y costes de salida.</li>' +
+      '</ul></div>';
   }
 
   /* ---------- Buscador ---------- */
@@ -996,7 +1284,7 @@
   }
 
   function sugerencias() {
-    var orden = ['m1s1', 'm4s1', 'm4s2', 'm6s2', 'm7s2', 'm8s2', 'm10s3'];
+    var orden = ['m1s1', 'm2s1', 'm3s1', 'm4s1', 'm4s2', 'm3s2', 'm4s5'];
     return orden.map(function (id) {
       var item = INDICE_SEC[id];
       if (!item) return null;
@@ -1067,7 +1355,15 @@
       if (item) return { tipo: 'seccion', item: item };
     }
     if (partes[0] === 'glosario') return { tipo: 'glosario' };
-    if (partes[0] === 'examen') return { tipo: 'examen' };
+    if (partes[0] === 'examen') {
+      var sub = partes[1] || '';
+      var temaId = partes[2] || '';
+      if (sub === 'estudio' || sub === 'tarjetas' || sub === 'test') {
+        return { tipo: 'examen', sub: sub, temaId: temaId };
+      }
+      return { tipo: 'examen', sub: '', temaId: '' };
+    }
+    if (partes[0] === 'charla') return { tipo: 'charla' };
     if (partes[0] === 'recursos') return { tipo: 'recursos' };
     return { tipo: 'inicio' };
   }
@@ -1097,8 +1393,13 @@
       html = vistaGlosario();
       titulo = 'Glosario';
     } else if (ruta.tipo === 'examen') {
-      html = vistaExamen();
-      titulo = 'Simulacro de examen';
+      if (ruta.sub === 'estudio') { html = vistaEstudio(ruta.temaId); titulo = 'Preguntas y respuestas'; }
+      else if (ruta.sub === 'tarjetas') { html = vistaTarjetas(ruta.temaId); titulo = 'Tarjetas del examen'; }
+      else if (ruta.sub === 'test') { html = vistaTest(ruta.temaId); titulo = 'Test del examen'; }
+      else { html = vistaExamen(); titulo = 'Examen del curso'; }
+    } else if (ruta.tipo === 'charla') {
+      html = vistaCharla();
+      titulo = 'La nube desde dentro';
     } else if (ruta.tipo === 'recursos') {
       html = vistaRecursos();
       titulo = 'Recursos y certificación';
@@ -1114,7 +1415,12 @@
 
     if (ruta.tipo === 'seccion') montarSeccion(ruta.item);
     else if (ruta.tipo === 'glosario') montarGlosario();
-    else if (ruta.tipo === 'examen') montarExamen();
+    else if (ruta.tipo === 'charla') montarCharla();
+    else if (ruta.tipo === 'examen') {
+      if (ruta.sub === 'estudio') montarEstudio();
+      else if (ruta.sub === 'tarjetas') montarTarjetas();
+      else if (ruta.sub === 'test') montarExamen();
+    }
   }
 
   /* ---------- Eventos globales ---------- */

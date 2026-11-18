@@ -40,11 +40,11 @@ from reportlab.platypus.tableofcontents import TableOfContents
 # Rutas y constantes
 # --------------------------------------------------------------------------
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SALIDA = os.path.join(RAIZ, 'libro', 'AWS-Cloud-Foundations-Libro.pdf')
+SALIDA = os.path.join(RAIZ, 'libro', 'Apuntes-AWS-Modulos-1-4.pdf')
 
-ANCHO, ALTO = 170 * mm, 240 * mm          # formato de libro 17 × 24 cm
-MARGEN_LAT = 46
-MARGEN_SUP = 64
+ANCHO, ALTO = 210 * mm, 297 * mm          # A4
+MARGEN_LAT = 58
+MARGEN_SUP = 62
 MARGEN_INF = 54
 ANCHO_UTIL = ANCHO - 2 * MARGEN_LAT
 
@@ -72,9 +72,10 @@ TIPOGRAFIA = {
 DIR_FUENTES = '/usr/share/fonts/truetype/dejavu'
 
 ETIQUETAS_APENDICE = {
-    'Apéndice A': 'Guía del examen CLF-C02',
-    'Apéndice B': 'Soluciones',
-    'Apéndice C': 'Glosario',
+    'Apéndice A': 'La nube desde dentro',
+    'Apéndice B': 'Examen del curso',
+    'Apéndice C': 'Soluciones',
+    'Apéndice D': 'Glosario',
 }
 
 TITULOS_CORTOS = {
@@ -411,7 +412,7 @@ def bloque_definiciones(items):
 # Elementos estructurales
 # --------------------------------------------------------------------------
 class Banner(Flowable):
-    """Banda de apertura de capítulo o apéndice."""
+    """Título de módulo o apéndice, en versión ligera para apuntes."""
 
     def __init__(self, etiqueta, titulo, numero, ancho=ANCHO_UTIL):
         Flowable.__init__(self)
@@ -420,8 +421,8 @@ class Banner(Flowable):
         self.titulo = titulo
         self.numero = numero
         self.ancho = ancho
-        self.lineas = simpleSplit(titulo, TITULO_B, 19, ancho - 64)
-        self.altura = 66 + 24 * len(self.lineas)
+        self.lineas = simpleSplit(titulo, TITULO_B, 22, ancho)
+        self.altura = 54 + 26 * len(self.lineas)
 
     def wrap(self, aw, ah):
         return self.ancho, self.altura
@@ -430,30 +431,24 @@ class Banner(Flowable):
         c = self.canv
         h = self.altura
         c.saveState()
-        c.setFillColor(NAVY)
-        c.roundRect(0, 0, self.ancho, h, 7, fill=1, stroke=0)
-        c.setFillColor(NARANJA)
-        c.rect(0, 0, 6, h, fill=1, stroke=0)
-        # número grande translúcido
-        c.setStrokeColor(colors.HexColor('#FFB03A'))
-        c.setStrokeAlpha(0.55)
-        c.setLineWidth(1.1)
-        c.setFont(TITULO_B, 62)
-        c._code.append('1 Tr')  # texto solo con contorno
-        c.drawRightString(self.ancho - 18, 8, str(self.numero))
-        c._code.append('0 Tr')
-        c.setStrokeAlpha(1)
         # etiqueta
-        c.setFillColor(NARANJA)
-        c.setFont(TITULO_B, 8)
-        c.drawString(24, h - 26, self.etiqueta.upper())
+        c.setFillColor(NARANJA_OSCURO)
+        c.setFont(TITULO_B, 8.5)
+        c.drawString(0, h - 12, self.etiqueta.upper())
         # título
-        c.setFillColor(colors.white)
-        c.setFont(TITULO_B, 19)
-        y = h - 50
+        c.setFillColor(NAVY)
+        c.setFont(TITULO_B, 22)
+        y = h - 40
         for linea in self.lineas:
-            c.drawString(24, y, linea)
-            y -= 24
+            c.drawString(0, y, linea)
+            y -= 26
+        # filete
+        c.setStrokeColor(NARANJA)
+        c.setLineWidth(2.2)
+        c.line(0, 6, 74, 6)
+        c.setStrokeColor(LINEA)
+        c.setLineWidth(0.5)
+        c.line(74, 6, self.ancho, 6)
         c.restoreState()
 
 
@@ -615,16 +610,12 @@ class Libro(BaseDocTemplate):
                       leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
 
         self.addPageTemplates([
-            PageTemplate(id='portada', frames=[marco_portada],
-                         onPage=lambda c, d: dibujar_portada(c, d)),
-            PageTemplate(id='final', frames=[marco_portada],
-                         onPage=lambda c, d: dibujar_contraportada(c, d)),
-            PageTemplate(id='capitulo', frames=[marco],
-                         onPage=lambda c, d: dibujar_pagina(c, d, cabecera=False)),
-            PageTemplate(id='cuerpo', frames=[marco],
-                         onPage=lambda c, d: dibujar_pagina(c, d, cabecera=True)),
             PageTemplate(id='limpio', frames=[marco],
                          onPage=lambda c, d: None),
+            PageTemplate(id='cuerpo', frames=[marco],
+                         onPage=lambda c, d: dibujar_pagina(c, d, cabecera=True)),
+            PageTemplate(id='capitulo', frames=[marco],
+                         onPage=lambda c, d: dibujar_pagina(c, d, cabecera=False)),
         ])
 
     def afterFlowable(self, flowable):
@@ -666,7 +657,7 @@ def dibujar_pagina(c, doc, cabecera=True):
         c.line(MARGEN_LAT, ALTO - 34, ANCHO - MARGEN_LAT, ALTO - 34)
         c.setFont(TITULO, 6.8)
         c.setFillColor(GRIS_TENUE)
-        c.drawString(MARGEN_LAT, ALTO - 46, 'AWS ACADEMY CLOUD FOUNDATIONS')
+        c.drawString(MARGEN_LAT, ALTO - 46, 'AWS ACADEMY CLOUD FOUNDATIONS · MÓDULOS 1 A 4')
         capitulo = doc.current_chapter.upper()
         if c.stringWidth(capitulo, TITULO, 6.8) > ANCHO_UTIL - 150:
             while capitulo and c.stringWidth(capitulo + '…', TITULO, 6.8) > ANCHO_UTIL - 150:
@@ -1018,10 +1009,9 @@ def capitulo(modulo, indice):
         ('LINEBELOW', (0, 0), (-1, -2), 0.3, LINEA),
     ]))
     e.append(t)
-    e.append(Spacer(1, 26))
-    e.append(Motivo())
+    e.append(Spacer(1, 14))
     e.append(NextPageTemplate('cuerpo'))
-    e.append(PageBreak())
+    e.append(CondPageBreak(170))
 
     for i, sec in enumerate(modulo['secciones'], 1):
         numero = '%d.%d' % (modulo['numero'], i)
@@ -1139,7 +1129,7 @@ def apendice_examen(modulos, preguntas):
 
 
 def apendice_soluciones(modulos):
-    e = apendice('Apéndice B', 'B', 'Soluciones de las autoevaluaciones',
+    e = apendice('Apéndice C', 'C', 'Soluciones de las autoevaluaciones',
                  'Cada respuesta incluye la explicación de por qué es correcta. Si has '
                  'fallado, vuelve a la sección correspondiente.')
     for m in modulos:
@@ -1164,7 +1154,7 @@ def apendice_soluciones(modulos):
 
 
 def apendice_glosario(terminos):
-    e = apendice('Apéndice C', 'C', 'Glosario',
+    e = apendice('Apéndice D', 'D', 'Glosario',
                  '%d términos esenciales, ordenados alfabéticamente. La referencia entre '
                  'paréntesis indica el módulo donde se explica cada uno.' % len(terminos))
 
@@ -1173,7 +1163,7 @@ def apendice_glosario(terminos):
         letra = item['letra']
         if letra != letra_actual:
             letra_actual = letra
-            e.append(Spacer(1, 8))
+            e.append(Spacer(1, 6))
             e.append(Paragraph(letra, ParagraphStyle(
                 'gl', parent=ST['Body'], fontName=TITULO_B, fontSize=13, leading=16,
                 textColor=NARANJA_OSCURO, spaceAfter=3)))
@@ -1191,13 +1181,121 @@ def apendice_glosario(terminos):
 def cargar_contenido():
     script = (
         "global.window={};"
-        "['m01','m02','m03','m04','m05','m06','m07','m08','m09','m10']"
-        ".forEach(f=>require('./assets/js/datos/'+f+'.js'));"
+        "const fs=require('fs'), p='./assets/js/datos/';"
+        "fs.readdirSync(p).filter(f=>/^m\d\d\.js$/.test(f)).sort()"
+        ".forEach(f=>require(p+f));"
         "process.stdout.write(JSON.stringify(window.MODULOS));"
     )
     salida = subprocess.run(['node', '-e', script], cwd=RAIZ,
                             capture_output=True, text=True, check=True)
     return json.loads(salida.stdout)
+
+
+def cargar_examen():
+    script = (
+        "global.window={};"
+        "require('./assets/js/datos/examen.js');"
+        "require('./assets/js/datos/charla.js');"
+        "process.stdout.write(JSON.stringify(window.EXAMEN));"
+    )
+    salida = subprocess.run(['node', '-e', script], cwd=RAIZ,
+                            capture_output=True, text=True, check=True)
+    return json.loads(salida.stdout)
+
+
+def apendice_examen_curso(temas):
+    total = sum(len(t['preguntas']) for t in temas)
+    e = apendice('Apéndice B', 'B', 'Examen del curso',
+                 'Las %d preguntas del examen con su respuesta literal, agrupadas por tema. '
+                 'Tapa la respuesta con la mano, contéstala en voz alta y compruébala '
+                 'después: es la forma más rápida de detectar lo que aún no controlas.'
+                 % total)
+    for t in temas:
+        e.append(Paragraph('Tema %d · %s' % (t['numero'], en_linea(t['titulo'])),
+                           ParagraphStyle('exh', parent=ST['H3'], spaceBefore=16,
+                                          fontSize=11, textColor=NAVY)))
+        for i, q in enumerate(t['preguntas'], 1):
+            e.append(Spacer(1, 7))
+            e.append(Paragraph('%d. %s' % (i, en_linea(q['p'])),
+                               ParagraphStyle('exp', parent=ST['Body'],
+                                              fontName='SerifBold', fontSize=8.9,
+                                              leading=12.4, spaceAfter=2,
+                                              keepWithNext=1)))
+            e.append(Paragraph(en_linea(q['r']),
+                               ParagraphStyle('exr', parent=ST['Body'], fontSize=8.6,
+                                              leading=12.2, textColor=GRIS,
+                                              leftIndent=12, spaceAfter=0)))
+    return e
+
+
+def cargar_charla():
+    script = (
+        "global.window={};"
+        "require('./assets/js/datos/charla.js');"
+        "process.stdout.write(JSON.stringify(window.CHARLA));"
+    )
+    salida = subprocess.run(['node', '-e', script], cwd=RAIZ,
+                            capture_output=True, text=True, check=True)
+    return json.loads(salida.stdout)
+
+
+def render_bloques(bloques):
+    e = []
+    for b in bloques:
+        tipo = b.get('t')
+        if tipo == 'p':
+            e.append(P(b.get('c', '')))
+        elif tipo in ('h', 'h3'):
+            e.append(Paragraph(en_linea(b.get('c', '')), ST['H3']))
+        elif tipo == 'ul':
+            e.extend(vinetas(b.get('c', [])))
+            e.append(Spacer(1, 4))
+        elif tipo == 'ol':
+            e.extend(numeradas(b.get('c', [])))
+            e.append(Spacer(1, 4))
+        elif tipo == 'tabla':
+            e.append(tabla(b.get('cab'), b.get('filas', [])))
+            e.append(Spacer(1, 9))
+        elif tipo == 'nota':
+            e.append(bloque_nota(b))
+        elif tipo == 'esquema':
+            e.append(bloque_esquema(b.get('c', [])))
+        elif tipo == 'def':
+            e.append(bloque_definiciones(b.get('c', [])))
+            e.append(Spacer(1, 8))
+    return e
+
+
+def apendice_charla(charla):
+    e = apendice('Apéndice A', 'A', charla['titulo'],
+                 '%s. %s Material de la charla de %s, impartida en el CIFP Avilés '
+                 'el 29 de octubre de 2026. Aquí está resumido apartado a apartado y con '
+                 'las diez preguntas de repaso al final.'
+                 % (charla['subtitulo'], '', charla['ponente']))
+
+    for i, a in enumerate(charla['apartados'], 1):
+        e.append(Paragraph('%d. %s' % (i, en_linea(a['titulo'])),
+                           ParagraphStyle('chh', parent=ST['H3'], spaceBefore=14,
+                                          fontSize=10.5, textColor=NAVY)))
+        e.extend(render_bloques(a['bloques']))
+
+    e.append(Spacer(1, 10))
+    e.append(Paragraph('Preguntas de repaso', ParagraphStyle(
+        'chr', parent=ST['H2'], fontSize=13, leading=17, spaceBefore=16,
+        spaceAfter=2, textColor=NAVY)))
+    e.append(Paragraph('Las diez del final del PDF, con una respuesta modelo.',
+                       ParagraphStyle('chrs', parent=ST['Small'], spaceAfter=6)))
+    for i, q in enumerate(charla['repasa'], 1):
+        e.append(Spacer(1, 6))
+        e.append(Paragraph('%d. %s' % (i, en_linea(q['p'])),
+                           ParagraphStyle('chp', parent=ST['Body'], fontName='SerifBold',
+                                          fontSize=8.9, leading=12.4, spaceAfter=2,
+                                          keepWithNext=1)))
+        e.append(Paragraph(en_linea(q['r']),
+                           ParagraphStyle('cha', parent=ST['Body'], fontSize=8.6,
+                                          leading=12.2, textColor=GRIS,
+                                          leftIndent=12, spaceAfter=0)))
+    return e
 
 
 def normaliza(texto):
@@ -1228,6 +1326,56 @@ def glosario(modulos):
 # --------------------------------------------------------------------------
 # Construcción
 # --------------------------------------------------------------------------
+def portada_apuntes(modulos, total_secciones, total_preguntas, terminos):
+    e = []
+    e.append(Spacer(1, 40))
+    e.append(Paragraph('AWS Academy · Cloud Foundations', ParagraphStyle(
+        'kicker', fontName=TITULO_B, fontSize=9, leading=12,
+        textColor=NARANJA_OSCURO, spaceAfter=10)))
+    e.append(Paragraph('La nube desde dentro', ParagraphStyle(
+        't1', fontName=TITULO_B, fontSize=30, leading=34, textColor=NAVY,
+        spaceAfter=4)))
+    e.append(Paragraph('Apuntes de los módulos 1 a 4', ParagraphStyle(
+        't2', fontName=TITULO_B, fontSize=19, leading=24, textColor=AZUL,
+        spaceAfter=14)))
+    e.append(Paragraph('Conceptos de nube · Facturación y economía · Infraestructura '
+                       'global · Seguridad', ParagraphStyle(
+        't3', fontName=CUERPO, fontSize=10.5, leading=15, textColor=GRIS,
+        spaceAfter=22)))
+    e.append(Paragraph(
+        'Apuntes de estudio en español de los cuatro primeros módulos del curso '
+        '<b>AWS Academy Cloud Foundations</b>, ampliados con el material de la charla '
+        '«La nube desde dentro: usuarios, proveedores y almacenamiento de objetos» '
+        '(%d módulos, %d secciones, %d preguntas de autoevaluación y %d términos).'
+        % (len(modulos), total_secciones, total_preguntas, len(terminos)),
+        ParagraphStyle('lead', parent=ST['Lead'], alignment=TA_LEFT, spaceAfter=18)))
+    filas = [[m['titulo'], '%d secciones' % len(m['secciones']), m['duracion']]
+             for m in modulos]
+    t = Table(filas, colWidths=[ANCHO_UTIL - 150, 80, 70])
+    t.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('FONTNAME', (0, 0), (0, -1), TITULO_B),
+        ('FONTNAME', (1, 0), (-1, -1), CUERPO),
+        ('FONTSIZE', (0, 0), (-1, -1), 8.6),
+        ('TEXTCOLOR', (0, 0), (0, -1), NAVY),
+        ('TEXTCOLOR', (1, 0), (-1, -1), GRIS),
+        ('LEFTPADDING', (0, 0), (0, -1), 0),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('LINEBELOW', (0, 0), (-1, -2), 0.3, LINEA),
+    ]))
+    e.append(t)
+    e.append(Spacer(1, 26))
+    e.append(Paragraph(
+        'Material didáctico independiente. No es un curso oficial de Amazon Web Services. '
+        'Las cifras de precios, límites y número de regiones cambian con el tiempo: '
+        'confirma siempre los datos en la documentación oficial de AWS.',
+        ParagraphStyle('aviso', parent=ST['Small'], alignment=TA_LEFT)))
+    e.append(NextPageTemplate('cuerpo'))
+    e.append(PageBreak())
+    return e
+
+
 def construir():
     modulos = cargar_contenido()
     total_secciones = sum(len(m['secciones']) for m in modulos)
@@ -1236,27 +1384,27 @@ def construir():
 
     doc = Libro(
         SALIDA,
-        title='AWS Academy Cloud Foundations · Curso completo en español',
+        title='La nube desde dentro · Apuntes de los módulos 1 a 4',
         author='Material didáctico independiente',
-        subject='Fundamentos de la nube de AWS · Preparación CLF-C02',
-        creator='Generador de libro (ReportLab)',
+        subject='AWS Academy Cloud Foundations · Módulos 1 a 4',
+        creator='Generador de apuntes (ReportLab)',
     )
 
     guion = []
-    guion.append(Spacer(1, 1))
     guion.append(NextPageTemplate('limpio'))
-    guion.append(PageBreak())
-
-    guion.extend(paginas_iniciales())
+    guion.append(Spacer(1, 1))
+    guion.extend(portada_apuntes(modulos, total_secciones, total_preguntas, terminos))
 
     for m in modulos:
-        guion.append(NextPageTemplate('capitulo'))
-        guion.append(PageBreak())
         guion.extend(capitulo(m, m['numero']))
 
     guion.append(NextPageTemplate('capitulo'))
     guion.append(PageBreak())
-    guion.extend(apendice_examen(modulos, total_preguntas))
+    guion.extend(apendice_charla(cargar_charla()))
+
+    guion.append(NextPageTemplate('capitulo'))
+    guion.append(PageBreak())
+    guion.extend(apendice_examen_curso(cargar_examen()))
 
     guion.append(NextPageTemplate('capitulo'))
     guion.append(PageBreak())
@@ -1266,13 +1414,9 @@ def construir():
     guion.append(PageBreak())
     guion.extend(apendice_glosario(terminos))
 
-    guion.append(NextPageTemplate('final'))
-    guion.append(PageBreak())
-    guion.append(Spacer(1, 1))
-
     doc.multiBuild(guion)
 
-    print('Libro generado: %s' % SALIDA)
+    print('Apuntes generados: %s' % SALIDA)
     print('Módulos: %d · Secciones: %d · Preguntas: %d · Términos: %d'
           % (len(modulos), total_secciones, total_preguntas, len(terminos)))
     print('Páginas: %d' % doc.page)

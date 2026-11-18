@@ -1,26 +1,56 @@
-# AWS Academy Cloud Foundations · Curso completo en español
+# AWS Academy Cloud Foundations · Módulos 1 a 4 · Curso en español
 
-Sitio web estático, sin dependencias ni proceso de compilación, con todo el temario de
-**AWS Academy Cloud Foundations** explicado en español: 10 módulos, 50 secciones,
-150 preguntas de autoevaluación y 260+ términos de glosario.
+Sitio web estático, sin dependencias ni proceso de compilación, con los **cuatro primeros
+módulos** de **AWS Academy Cloud Foundations** explicados en español: 4 módulos,
+17 secciones, 57 preguntas de repaso, 98 términos de glosario y un **examen de 60
+preguntas** con su respuesta oficial (las 40 del curso más las 20 de la charla).
+
+Está ampliado con el material de la charla **«La nube desde dentro: usuarios, proveedores
+y almacenamiento de objetos»** (Marcos García Martín, MEGA S4, CIFP Avilés, 29 de octubre
+de 2026): repartido por las secciones de los cuatro módulos y, además, con un apartado
+propio en `#/charla` que resume sus 13 bloques, recoge las 10 preguntas de repaso y
+enlaza al PDF original.
 
 ## Contenido
 
-| Módulos | Tema |
-| --- | --- |
-| 1 | Información general sobre los conceptos de la nube |
-| 2 | Facturación y economía de la nube |
-| 3 | Infraestructura global de AWS |
-| 4 | Seguridad en la nube |
-| 5 | Redes y entrega de contenido |
-| 6 | Informática (cómputo) |
-| 7 | Almacenamiento |
-| 8 | Bases de datos |
-| 9 | Arquitectura en la nube |
-| 10 | Monitoreo y escalado automático |
+| Módulo | Tema | Secciones |
+| --- | --- | --- |
+| 1 | Información general sobre los conceptos de la nube | 4 |
+| 2 | Facturación y economía de la nube | 5 |
+| 3 | Información general sobre la infraestructura global de AWS | 2 |
+| 4 | Seguridad en la nube | 6 |
 
 Cada sección incluye objetivos de aprendizaje, explicación con tablas y esquemas,
 notas orientadas al examen, términos clave y un cuestionario con explicaciones.
+
+### Material de la charla, ya integrado
+
+| Idea | Dónde aparece |
+| --- | --- |
+| Serverless como modelo de servicio y cuándo sale más barato | 1.1 |
+| Roles profesionales (DevOps, SRE, plataforma, arquitectura cloud) | 1.3 |
+| Percentiles, la cola lenta y «un archivo grande frente a muchos pequeños» | 1.2 |
+| Criterios para elegir proveedor, lock-in, Dropbox y Netflix, Data Act | 1.4 |
+| Los cinco conceptos que se facturan y el peligro del egress | 2.1 |
+| Incidentes reales (incendio de OVHcloud, caída de us-east-1) y el trabajo del proveedor | 3.1 |
+| Almacenamiento de objetos, once nueves, HLS y CDN, arquitectura web mínima | 3.2 |
+| Qué hace el proveedor por dentro y qué no cubre el modelo compartido | 4.1 |
+| Dependabot, OWASP y revisión de dependencias del propio proyecto | 4.3 |
+| Copias de seguridad en tres niveles, regla 3-2-1 e inmutabilidad | 4.5 |
+
+## Examen del curso
+
+Las **60 preguntas** del examen (5 temas: los 4 del curso, 10 preguntas cada uno, más
+las 20 de la charla) con su respuesta literal, en tres modos de estudio:
+
+| Modo | Qué hace |
+| --- | --- |
+| **Estudio** | Las 60 preguntas y respuestas seguidas, con opción de ocultar las respuestas para autoevaluarse |
+| **Tarjetas** | Una pregunta por pantalla, respuesta tras un botón, y marcas «la sabía» / «a repasar» (se guardan en `localStorage`) |
+| **Test** | Opción múltiple por tema o completa, con corrección inmediata o modo examen y revisión final |
+
+Las respuestas son las del examen, sin reescribir. Las opciones incorrectas del test son
+versiones plausibles de cada respuesta, para comprobar que se distingue el matiz.
 
 ## Funciones
 
@@ -28,8 +58,9 @@ notas orientadas al examen, términos clave y un cuestionario con explicaciones.
 - **Buscador global** (`Ctrl` + `K` o `/`) sobre secciones, módulos y glosario.
 - **Progreso guardado** en `localStorage`: porcentaje, secciones completadas por módulo y reinicio.
 - **Cuestionarios** con corrección inmediata y explicación de cada respuesta.
-- **Simulacro de examen** configurable (10–40 preguntas, por módulo o global) en modo práctica
-  o modo examen, con revisión final de todas las preguntas.
+- **Examen del curso** con 60 preguntas (5 temas) en modo estudio, tarjetas y test.
+- **Apartado de la charla** (`#/charla`): resumen de sus 13 bloques, las 10 preguntas de
+  repaso con respuesta y enlace al PDF original.
 - **Glosario** alfabético con filtro por texto y por módulo.
 - **Tema claro/oscuro**, diseño responsive y estilos de impresión (PDF).
 
@@ -39,7 +70,9 @@ notas orientadas al examen, términos clave y un cuestionario con explicaciones.
 index.html                  Estructura, navegación y contenedores
 assets/css/estilos.css      Diseño completo (temas, componentes, responsive, impresión)
 assets/js/app.js            Router por hash, render, progreso, buscador, quiz y examen
-assets/js/datos/m01..m10.js Contenido de cada módulo
+assets/js/datos/m01..m04.js Contenido de cada módulo
+assets/js/datos/examen.js   Las 40 preguntas del curso y sus opciones
+assets/js/datos/charla.js   Resumen de la charla, sus 10 preguntas y el tema 5 del examen
 ```
 
 El contenido vive en `assets/js/datos/*.js` como objetos JavaScript. Cada módulo se registra con:
@@ -67,6 +100,19 @@ El contenido vive en `assets/js/datos/*.js` como objetos JavaScript. Cada módul
 
 Clases de nota disponibles: `examen`, `tip`, `aviso`, `dato`.
 
+El examen vive en un archivo aparte con esta forma:
+
+```js
+(window.EXAMEN = window.EXAMEN || []).push({
+  id: 't1', numero: 1, titulo: '…', seccion: 'm1s1',
+  preguntas: [
+    { p: 'Pregunta', r: 'Respuesta oficial', op: ['a', 'b', 'c', 'd'], ok: 2 }
+  ]
+});
+```
+
+`seccion` enlaza cada tema con la sección del temario que lo desarrolla.
+
 ## Uso local
 
 No requiere instalación. Sirve la carpeta con cualquier servidor estático:
@@ -77,6 +123,15 @@ python3 -m http.server 8000
 ```
 
 También funciona abriendo `index.html` directamente en el navegador.
+
+## Fuentes
+
+- Documentación oficial de AWS (definiciones, límites y precios).
+- Temario de AWS Academy Cloud Foundations, módulos 1 a 4.
+- Charla «La nube desde dentro: usuarios, proveedores y almacenamiento de objetos», de
+  Marcos García Martín (Software Engineer en MEGA S4), CIFP Avilés, 29 de octubre de 2026,
+  módulo Despliegue en la nube (MOC) 0492.
+- Reglamento (UE) 2023/2854 (Data Act), para las obligaciones de cambio de proveedor.
 
 ## Ejecutable para Windows
 

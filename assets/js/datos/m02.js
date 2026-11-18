@@ -51,6 +51,16 @@
           '**AWS Academy Learner Lab:** el entorno del curso no usa la cuenta personal, sino un laboratorio con créditos limitados y temporales que se reinicia periódicamente. Todo lo que se cree en el laboratorio desaparece al terminar la sesión.'
         ] },
         { t: 'nota', clase: 'aviso', titulo: 'Cuidado con el laboratorio', c: 'En el Learner Lab, los recursos se detienen al finalizar la sesión de laboratorio y el progreso puede perderse. Guarda siempre el código y la documentación fuera del laboratorio.' },
+        { t: 'h', c: 'Los cinco conceptos que se facturan' },
+        { t: 'p', c: 'Casi cualquier factura de nube se descompone en cinco conceptos. Reconocerlos permite estimar un proyecto antes de desplegarlo y detectar qué línea se dispara cuando algo se descontrola.' },
+        { t: 'tabla', cab: ['Concepto', 'Qué se cobra', 'Ejemplo'], filas: [
+          ['Cómputo', 'Horas de servidor encendido, CPU y memoria', 'Una instancia EC2 detenida no cobra cómputo, pero su disco EBS sí'],
+          ['Almacenamiento', 'Los datos guardados a lo largo del tiempo', 'Gigabytes-mes en S3, EBS, EFS o instantáneas'],
+          ['Peticiones', 'Cada operación de lectura o escritura que llega a la API', 'Peticiones PUT y GET a S3 o escrituras en DynamoDB'],
+          ['Servicios y tareas', 'Por trabajo ejecutado, no por tiempo de máquina', 'Cada vídeo traducido por una función Lambda'],
+          ['Salida de datos (egress)', 'Cada gigabyte que sale hacia internet', 'Descargas de una web alojada en la nube']
+        ] },
+        { t: 'nota', clase: 'aviso', titulo: 'El egress es el coste que nadie vigila', c: 'Depende de tus usuarios, no de ti. Una aplicación pequeña sin límites se hace viral, se conectan 100.000 personas y la factura de salida puede llegar a decenas de miles de euros en un fin de semana.' },
         { t: 'h', c: 'Costes que sorprenden' },
         { t: 'ul', c: [
           '**Direcciones IP elásticas no asociadas:** se facturan si están reservadas y sin usar.',
@@ -58,18 +68,29 @@
           '**Tráfico entre zonas de disponibilidad:** es habitual en arquitecturas multi-AZ; se cobra el que cruza zonas.',
           '**NAT Gateway:** se paga por hora y por GB procesado, y suele ser una de las líneas más altas en facturas pequeñas.',
           '**Sistemas de archivos y volúmenes huérfanos:** recursos olvidados que nadie apaga.'
-        ] }
+        ] },
+        { t: 'h', c: 'Elegir según lo que necesitas' },
+        { t: 'p', c: 'No existe la opción «más barata» en abstracto: depende del trabajo. Con la misma aplicación, la factura cambia por completo según el modelo elegido.' },
+        { t: 'tabla', cab: ['Opción', 'Cuándo sale a cuenta', 'Qué se paga'], filas: [
+          ['VPS o servidor pequeño siempre encendido', 'Proyectos estables, con procesos largos y control total del sistema', 'Una cuota fija mensual, esté usado o no'],
+          ['Servicio gestionado (RDS, S3, CloudFront)', 'Cuando no quieres administrar parches ni copias', 'Consumo más una prima por la gestión'],
+          ['Serverless (Lambda, API Gateway)', 'Tráfico irregular, prototipos, picos puntuales', 'Por invocación y por milisegundo'],
+          ['Instancias reservadas o Savings Plans', 'Carga alta y sostenida durante uno o tres años', 'Compromiso por adelantado con descuento']
+        ] },
+        { t: 'nota', clase: 'tip', titulo: 'Simula antes de desplegar', c: 'La calculadora de precios permite estimar el coste mensual de una arquitectura completa. Hazlo antes de la primera factura: cambiar después de un mal diseño sale más caro que cambiar de idea.' }
       ],
       terminos: [
         { t: 'Pago por uso', d: 'Modelo en el que se factura únicamente el consumo real del recurso.' },
         { t: 'Instancia reservada', d: 'Compromiso de 1 o 3 años a cambio de un descuento importante en EC2, RDS u otros servicios.' },
         { t: 'Savings Plans', d: 'Compromiso de gasto por hora durante 1 o 3 años con descuentos flexibles.' },
         { t: 'Instancia Spot', d: 'Capacidad sobrante de EC2 con hasta un 90 % de descuento, interrumpible.' },
+        { t: 'FinOps', d: 'Disciplina que alinea equipos de negocio, finanzas y tecnología para optimizar el gasto en la nube.' },
         { t: 'Data transfer out', d: 'Datos que salen de AWS hacia internet; es un factor de coste habitual.' }
       ],
       quiz: [
         { p: '¿Cuál de estos tres factores determina principalmente el coste en AWS?', op: ['El número de usuarios de la consola', 'La transferencia de datos salientes', 'El número de políticas de IAM', 'La cantidad de etiquetas aplicadas'], ok: 1, e: 'Los tres factores de coste son cómputo, almacenamiento y transferencia de datos salientes. Los otros elementos no generan coste.' },
         { p: 'Una empresa tiene una carga de trabajo por lotes que puede reanudarse si se interrumpe y quiere minimizar el coste. ¿Qué opción debería elegir?', op: ['Instancias bajo demanda', 'Instancias reservadas de 3 años', 'Instancias Spot', 'Hosts dedicados'], ok: 2, e: 'Las instancias Spot ofrecen hasta un 90 % de descuento a cambio de poder ser interrumpidas, ideales para procesamiento por lotes.' },
+        { p: 'Una web alojada en AWS se hace viral y multiplica las descargas. ¿Qué concepto de la factura crece sin que hayas cambiado nada de tu infraestructura?', op: ['El almacenamiento', 'Las peticiones de la consola', 'La salida de datos hacia internet (egress)', 'Las políticas de IAM'], ok: 2, e: 'El egress se paga por gigabyte descargado y depende del comportamiento de los usuarios; por eso conviene vigilarlo con presupuestos y alarmas.' },
         { p: '¿Qué tipo de tráfico suele ser gratuito en AWS?', op: ['La salida de datos a internet', 'La entrada de datos a AWS', 'El tráfico entre regiones', 'El tráfico entre zonas de disponibilidad'], ok: 1, e: 'La transferencia de datos entrante a AWS normalmente no se cobra; la saliente sí.' }
       ]
     },
